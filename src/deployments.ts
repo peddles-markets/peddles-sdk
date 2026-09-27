@@ -1,0 +1,60 @@
+import { DEPLOYMENTS, type KnownChainId, type ContractName } from './deployments.generated.js';
+
+export { DEPLOYMENTS };
+export type { KnownChainId, ContractName };
+
+/** Thrown when the SDK is asked about a chain it ships no address book for. */
+export class UnknownChainError extends Error {
+  readonly chainId: number;
+  constructor(chainId: number) {
+    super(
+      `Peddles SDK has no deployment for chain ${chainId}. ` +
+        `Known chains: ${Object.keys(DEPLOYMENTS).join(', ')}. ` +
+        `Pass an explicit address map if you are pointing at a private deployment.`,
+    );
+    this.name = 'UnknownChainError';
+    this.chainId = chainId;
+  }
+}
+
+/** Thrown when a chain is known but does not carry the contract being asked for. */
+export class UnknownContractError extends Error {
+  constructor(chainId: number, name: string) {
+    super(
+      `Peddles SDK has no address for ${name} on chain ${chainId}. ` +
+        `That deployment may predate the contract.`,
+    );
+    this.name = 'UnknownContractError';
+  }
+}
+
+export function isKnownChain(chainId: number): chainId is KnownChainId {
+  return Object.prototype.hasOwnProperty.call(DEPLOYMENTS, chainId);
+}
+
+/**
+ * The address book for one chain.
+ *
+ * FAILS CLOSED, ALWAYS. An unknown chain throws rather than returning a default
+ * or an empty map, and a missing contract throws rather than returning
+ * `undefined` or the zero address. Both of those alternatives look like a
+ * working call right up until a transaction is signed against nothing.
+ *
+ * This is not hypothetical in this codebase: every address changed in a single
+ * redeploy, and one stale copy of this list had the API quoting a launchpad that
+ * no longer existed — an error that surfaced as "neither leg is a launched coin"
+ * rather than as a missing address.
+ */
+export function deploymentFor(chainId: number): Readonly<Record<string, `0x${string}`>> {
+  if (!isKnownChain(chainId)) throw new UnknownChainError(chainId);
+  return DEPLOYMENTS[chainId] as Readonly<Record<string, `0x${string}`>>;
+}
+
+/** One address, or a throw. Never a default, never the zero address. */
+export function addressOf(chainId: number, name: string): `0x${string}` {
+  const book = deploymentFor(chainId);
+  // Own properties only: `book['constructor']` would otherwise return a function.
+  const found = Object.prototype.hasOwnProperty.call(book, name) ? book[name] : undefined;
+  if (!found || /^0x0{40}$/.test(found)) throw new UnknownContractError(chainId, name);
+  return found;
+}

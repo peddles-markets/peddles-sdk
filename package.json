@@ -1,0 +1,82 @@
+{
+  "name": "@peddles/sdk",
+  "version": "0.1.0",
+  "description": "Read and build against Peddles launches — memecoins paired to tokenised stocks.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "private": true,
+  "homepage": "https://peddles.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peddles-markets/peddles-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/peddles-markets/peddles-sdk/issues"
+  },
+  "keywords": [
+    "peddles",
+    "launchpad",
+    "tokenised-stocks",
+    "uniswap-v4",
+    "base",
+    "viem",
+    "sdk",
+    "memecoin"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./abis": {
+      "types": "./dist/abis.d.ts",
+      "import": "./dist/abis.js",
+      "default": "./dist/abis.js"
+    },
+    "./clog": {
+      "types": "./dist/clog.d.ts",
+      "import": "./dist/clog.js",
+      "default": "./dist/clog.js"
+    },
+    "./deployments": {
+      "types": "./dist/deployments.d.ts",
+      "import": "./dist/deployments.js",
+      "default": "./dist/deployments.js"
+    },
+    "./launch": {
+      "types": "./dist/launch/index.d.ts",
+      "import": "./dist/launch/index.js",
+      "default": "./dist/launch/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/__tests__",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.examples.json",
+    "test": "node --import tsx --import ./script/node-test.mjs --test \"src/**/*.test.ts\"",
+    "smoke": "node script/live-smoke.mjs"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "viem": "^2.21.0"
+  }
+}
