@@ -23,7 +23,7 @@ went wrong when one reverts — with the same code the Peddles app runs.
 | --- | --- | --- | --- |
 | **Base** | 8453 | ✅ Live — mainnet | [base.blockscout.com](https://base.blockscout.com) · [basescan.org](https://basescan.org) |
 | **Sepolia** | 11155111 | ✅ Live — testnet (mock stock legs, no dollar value) | [sepolia.etherscan.io](https://sepolia.etherscan.io) |
-| Robinhood Chain | 4663 | 🔜 Coming soon | [robin.etherscan.io](https://robin.etherscan.io) |
+| **Robinhood Chain** | 4663 | ✅ Live — mainnet | [robin.etherscan.io](https://robin.etherscan.io) |
 | Arc | 5042 | 🔜 Coming soon | — |
 | BNB Smart Chain | 56 | 🔜 Coming soon | [bscscan.com](https://bscscan.com) |
 
@@ -68,7 +68,7 @@ import { supportedChains, addressOf, getTokenInfo, getPoolTerms, feeSplit } from
 
 const client = createPublicClient({ chain: base, transport: http() });
 
-supportedChains();                           // [11155111, 8453]
+supportedChains();                           // [4663, 8453, 11155111]
 addressOf(8453, 'PeddlesFactoryV20');        // 0x90bD4d38F621529b4aD6480c221075B7317b1978
 
 // Identity and supply, read from the token itself — never assume 18 decimals.

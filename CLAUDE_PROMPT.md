@@ -60,8 +60,8 @@ signatures before calling anything; do not invent parameters.
 
 ## Chains — resolve everything from the active chain, never hardcode one
 
-- Live today: **Base 8453 (mainnet)** and **Sepolia 11155111 (testnet)**. Coming soon: Robinhood Chain
-  4663, Arc 5042, BNB Smart Chain 56. `supportedChains()` is the source of truth — call it, don't copy
+- Live today: **Base 8453 (mainnet)**, **Robinhood Chain 4663 (mainnet)** and **Sepolia 11155111
+  (testnet)**. Coming soon: Arc 5042, BNB Smart Chain 56. `supportedChains()` is the source of truth — call it, don't copy
   this list.
 - Take the chain from the user's wallet / app config. If `isKnownChain(chainId)` is false, **disable the
   Peddles feature and say so**; never fall back to another chain's addresses. The same contract name has

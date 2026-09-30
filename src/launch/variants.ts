@@ -176,8 +176,8 @@ export function variantForType(variants: readonly LaunchVariant[], type: 'standa
     return v.refusal ? { refusal: v.refusal } : { variant: v };
   }
   const clogs = variants.filter((x) => x.id !== VARIANT_ASSET && x.terms.ok && x.terms.shape === 'clog' && x.enabled);
-  if (clogs.length === 0) return { refusal: 'No Clog launch type is open on this chain.' };
-  if (clogs.length > 1) return { refusal: 'More than one Clog launch type is open on this chain; pass the variant id explicitly.' };
+  if (clogs.length === 0) return { refusal: 'No Drip launch type is open on this chain.' };
+  if (clogs.length > 1) return { refusal: 'More than one Drip launch type is open on this chain; pass the variant id explicitly.' };
   const v = clogs[0]!;
   return v.refusal ? { refusal: v.refusal } : { variant: v };
 }
