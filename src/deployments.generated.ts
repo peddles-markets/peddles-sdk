@@ -1,37 +1,10 @@
 // GENERATED FILE — DO NOT EDIT.
-// Written by script/generate-deployments.mjs from contracts/deployments/<chainId>.json.
+// Written by script/generate-deployments.mjs from contracts/deployments/<chainId>.json
+// and <chainId>-perp.json.
 // Re-run it after any deploy and commit the result.
 
 /** Every Peddles contract address the SDK knows, by chain id. */
 export const DEPLOYMENTS = {
-  11155111: {
-    PeddlesClogVaultFactory: '0xfB0F195B48504AC1cCf5BB4645d6C4e3629f17e2',
-    PeddlesFactoryV20: '0x12bf64D5F363D8eD7c3B768e16403D8269681978',
-    PeddlesFeeForwarder: '0xAaE2f441D40BB4b3b261A4706EF67f7dbA2678D9',
-    PeddlesFeeHook: '0xA86d73085496230C5699ED61b56aCA7cCb6940cC',
-    PeddlesFlywheel: '0xd165c147B419BDcd438AAA89E5d99a3409eb1978',
-    PeddlesHandleLauncher: '0x47619338D72839c25d1BeFEb126C5630955bd568',
-    PeddlesHandlePotFactory: '0x52def04C3a30Bddf4C5fa1C8bE05cBa40969467F',
-    PeddlesHolderRewardsFactory: '0x8f3529B45b383b59fBa43C475879B1259B871978',
-    PeddlesLaunchOrchestratorV20: '0x96095b14a3b147F7d0C24d00Cf3Fe02C98241978',
-    PeddlesLiquidityActivationManager: '0x8B790592dE5700f77aFeE626CDcdD2eCF59c1978',
-    PeddlesNFTBondingGraduationOrchestratorV20: '0x253440d3F0752AAf42F5f6eD54D4EEC6af6E1978',
-    PeddlesNFTFactory: '0x58a1E468dd6E63572f1D728Fd0875e1Fc2191978',
-    PeddlesNftFeeDistributorFactory: '0x4F1b96f92a671d92FC1Ad35aee1226CD5e531978',
-    PeddlesNftLiquidityReserve: '0x278C85fB401c5e4E8e74F5eB266e0824462D1978',
-    PeddlesNFTMarketplace: '0xFc2Be9FD3eb605e9a1e108Fdd947450eCDB91978',
-    PeddlesNftStockGraduationOrchestrator: '0xD2dB230C22434dC8005A8D30421b624921B31978',
-    PeddlesRouteSwapRouter: '0x48ca1bBB67Ca2b948F828ad98EF6Ac7dA56a32d9',
-    PeddlesStockLaunchpad: '0x9013388Ca21Dd702A2545AF58Ce1aE9d663f1978',
-    PeddlesStockSwapRouter: '0x6454De06Dfd57a55a932441b72b7898C2D2A1978',
-    PeddlesStockVaultFactory: '0xCe4059077d3F5e778410ecd2e9d601A1188B1978',
-    PeddlesToken: '0x3E45f262CAE55d2a3561c7dac0deC64037CF1978',
-    PeddlesTransferValidator: '0x5b6b10FD1629D69cA161704b4e92822558F31978',
-    PeddlesV4LiquidityExecutor: '0xe7A7c2Ab7FF8148b0A18c3ccF6D972e4Ea041978',
-    PeddlesV4SwapRouter: '0x4DFa1c235Aa177CFB5BDB7aD135E47C5Df551978',
-    PeddlesVaultFactoryV20: '0xe1613d9670fb1BBf153d9A6351C8C5C49e641978',
-    PeddlesVaultRegistry: '0xfC0B7Fa76ceF899feBc3A5CF1aa9ae5f99E81978',
-  },
   4663: {
     PeddlesClogVaultFactory: '0x1d2142699F1D818203738226240C605243a39b9e',
     PeddlesFactoryV20: '0x51336A94B55Ad82D1099Dc82b27b151eDFfc1978',
@@ -48,6 +21,9 @@ export const DEPLOYMENTS = {
     PeddlesNftLiquidityReserve: '0x367F626775E22818C369BB3a276E3e9Fbc201978',
     PeddlesNFTMarketplace: '0xC0374a0776449fE60dD1653C6421bEB41e911978',
     PeddlesNftStockGraduationOrchestrator: '0x3DAd8D2B78C8a71f01600FDecA0b17af5F961978',
+    PeddlesPerpFactory: '0xCFA648281759C406E921F736c86ece2a9c4D1Fca',
+    PeddlesPerpHookDeployer: '0x3ab1848069cE7d19CD62ffB645292146cDd0139F',
+    PeddlesPerpTreasury: '0x2C322f48B2dD97f6c5050eDF5F349C7f70126dB5',
     PeddlesRouteSwapRouter: '0xA4858047F9c7359CC0d9071598BFA74187739d8D',
     PeddlesStockLaunchpad: '0x4b7Aa977eA4B95D9859D73e6bc922ecF2F881978',
     PeddlesStockSwapRouter: '0x5A934c5eE47daa3b4562f9Dc9224bB00e9191978',
@@ -75,6 +51,9 @@ export const DEPLOYMENTS = {
     PeddlesNftLiquidityReserve: '0x444C34FF8503eA088a36792659D7c34D7F931978',
     PeddlesNFTMarketplace: '0x5362a7DE96E8b3474Aef1a0fE6F6e2427Bd81978',
     PeddlesNftStockGraduationOrchestrator: '0xD6d41a5029EC7F78886C135A71A9c85e96781978',
+    PeddlesPerpFactory: '0x71a8EF2288fFdB3b1d546C33a16F0d4104E11488',
+    PeddlesPerpHookDeployer: '0x9122dAd755B6F8c1DB5F2B7c494580169fB327F2',
+    PeddlesPerpTreasury: '0xDB77eA86006E530D25789F2cf2aeB7bd2C7c3745',
     PeddlesRouteSwapRouter: '0x8f04A804Ba989d38A68D93eb8679d3a967f2b079',
     PeddlesStockLaunchpad: '0x680805FBd0D6225d0bE4E12A2B73b2Ed83a31978',
     PeddlesStockSwapRouter: '0xd150B1E102493e4F35A1e95DdA80948C0e581978',
@@ -88,5 +67,32 @@ export const DEPLOYMENTS = {
   },
 } as const;
 
+/**
+ * The perp launchpad on each chain that has one (from contracts/deployments/<chainId>-perp.json).
+ * `baseCandidates` are the bases the deploy whitelisted — CANDIDATES only: whether a base is
+ * allowed, and on what curve, is read live from `PeddlesPerpFactory.bases(base)`.
+ */
+export const PERP_DEPLOYMENTS = {
+  4663: {
+    PeddlesPerpFactory: '0xCFA648281759C406E921F736c86ece2a9c4D1Fca',
+    PeddlesPerpHookDeployer: '0x3ab1848069cE7d19CD62ffB645292146cDd0139F',
+    PeddlesPerpTreasury: '0x2C322f48B2dD97f6c5050eDF5F349C7f70126dB5',
+    hookCodePointer: '0xf97907D6AA1Ae3D3Ec3247eEfA998C8D6BE78605',
+    baseCandidates: {
+      WETH: '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73',
+    },
+  },
+  8453: {
+    PeddlesPerpFactory: '0x71a8EF2288fFdB3b1d546C33a16F0d4104E11488',
+    PeddlesPerpHookDeployer: '0x9122dAd755B6F8c1DB5F2B7c494580169fB327F2',
+    PeddlesPerpTreasury: '0xDB77eA86006E530D25789F2cf2aeB7bd2C7c3745',
+    hookCodePointer: '0xDAE55090fF0ffb81E3da33C79950DF7Ef78379aA',
+    baseCandidates: {
+      WETH: '0x4200000000000000000000000000000000000006',
+    },
+  },
+} as const;
+
 export type KnownChainId = keyof typeof DEPLOYMENTS;
+export type PerpChainId = keyof typeof PERP_DEPLOYMENTS;
 export type ContractName<C extends KnownChainId = KnownChainId> = keyof (typeof DEPLOYMENTS)[C];

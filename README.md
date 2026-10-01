@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/og.png" alt="Peddles — Multi Chain Stock Pairs Launchpad" width="100%" />
+  <img src="https://raw.githubusercontent.com/peddles-markets/peddles-sdk/main/.github/og.png" alt="Peddles — Multi Chain Stock Pairs Launchpad" width="100%" />
 </p>
 
 # Peddles SDK
@@ -22,7 +22,6 @@ went wrong when one reverts — with the same code the Peddles app runs.
 | Chain | Chain id | Status | Explorer |
 | --- | --- | --- | --- |
 | **Base** | 8453 | ✅ Live — mainnet | [base.blockscout.com](https://base.blockscout.com) · [basescan.org](https://basescan.org) |
-| **Sepolia** | 11155111 | ✅ Live — testnet (mock stock legs, no dollar value) | [sepolia.etherscan.io](https://sepolia.etherscan.io) |
 | **Robinhood Chain** | 4663 | ✅ Live — mainnet | [robin.etherscan.io](https://robin.etherscan.io) |
 | Arc | 5042 | 🔜 Coming soon | — |
 | BNB Smart Chain | 56 | 🔜 Coming soon | [bscscan.com](https://bscscan.com) |
@@ -46,6 +45,7 @@ before it was published (`npm run smoke` re-checks them live).
 | **Anti-sniper opening tax** | 20% on the first block, decaying to the pool's normal tax over ~3 minutes. The creator's own buy in the launch transaction pays the normal rate. |
 | **Holder rewards** | Paid in the pool's quote asset (a TSLA-paired coin pays TSLA), deployed and bound inside the launch transaction. |
 | **Uniswap v4 venue** | Pools are native Uniswap v4 pools, identified by the Peddles fee hook address. |
+| **Perps** | A perp launchpad (`PeddlesPerpFactory`) on **Base** and **Robinhood Chain**: one transaction launches a coin whose v4 pool carries leveraged longs and shorts against its own liquidity. See [Perps](#perps). |
 
 Fee legs (constants in the contract, exposed by the SDK): **0.50% platform + 0.50% creator** are fixed
 inside every pool's tax; everything above them is split between the creator and holders at the
@@ -54,7 +54,7 @@ creator's chosen ratio. `feeSplit()` computes it exactly.
 ## Install
 
 ```bash
-npm install github:peddles-markets/peddles-sdk viem
+npm i @peddles/sdk viem
 ```
 
 `viem` (v2) is a peer dependency. The package is ESM and ships its TypeScript types.
@@ -68,7 +68,7 @@ import { supportedChains, addressOf, getTokenInfo, getPoolTerms, feeSplit } from
 
 const client = createPublicClient({ chain: base, transport: http() });
 
-supportedChains();                           // [4663, 8453, 11155111]
+supportedChains();                           // [4663, 8453]
 addressOf(8453, 'PeddlesFactoryV20');        // 0x90bD4d38F621529b4aD6480c221075B7317b1978
 
 // Identity and supply, read from the token itself — never assume 18 decimals.
@@ -114,6 +114,53 @@ Stock-paired launches use `buildStockLaunchCall` / `encodeStockLaunchCall` with 
 (the whitelisted stock legs) and `readStockLaunchFee()`. Clog and NFT helpers live in the root export
 (`getClogState`, `clogShareOfInflows`, `graduateAndBuyRequest`, …).
 
+## Perps
+
+```ts
+import {
+  perpContracts, readPerpBase, predictPerpToken, predictPerpHook,
+  isValidPerpHookAddress, buildPerpCreate, perpFactoryAbi,
+} from '@peddles/sdk/perps';
+
+const { factory, hookDeployer, baseCandidates } = perpContracts(8453);   // or 4663; throws elsewhere
+
+// Is the base open for launches, and on what curve? Read live — never from a file.
+const weth = await readPerpBase(client, 8453, baseCandidates.WETH);
+if (!weth.allowed) throw new Error('perp launches on WETH are closed on this chain');
+
+// 1. The token address (any salt works).
+const tokenSalt = randomBytes32();
+const tokenHash = await client.readContract({ address: factory, abi: perpFactoryAbi,
+  functionName: 'tokenInitCodeHash', args: [name, symbol, tokenUri] });
+const token = predictPerpToken(factory, tokenSalt, tokenHash);
+
+// 2. MINE the hook salt: v4 reads a hook's permissions from the low 14 bits of its address.
+const hookHash = await client.readContract({ address: factory, abi: perpFactoryAbi,
+  functionName: 'hookInitCodeHash', args: [token] });
+let hookSalt = randomBytes32(), hook = predictPerpHook(hookDeployer, hookSalt, hookHash);
+while (!isValidPerpHookAddress(hook)) {           // ~16k attempts on average — run it in a Web Worker
+  hookSalt = increment(hookSalt);
+  hook = predictPerpHook(hookDeployer, hookSalt, hookHash);
+}
+// Confirm both with the factory's own predictToken / predictHook before building.
+
+// 3. The call. Not payable; a seed buy (bigint, base units) needs an exact approval to `factory` first.
+const tx = buildPerpCreate({ chainId: 8453, name, symbol, tokenUri, base: weth.base,
+  tokenSalt, hookSalt, seedBuyBase: 0n, hookAddress: hook });   // { to, data, value: 0n }
+```
+
+The Peddles app mines in a Web Worker over a preallocated `0xff ‖ deployer ‖ salt ‖ initCodeHash`
+buffer, bumping only the salt bytes — one keccak per attempt. Mining is left to the caller so you
+choose where it runs. Neither salt is bound to the sender: a copied pending `create` that lands first
+takes the addresses, and the original reverts having paid only gas.
+
+| Chain | Perps |
+| --- | --- |
+| Base 8453 | ✅ Live |
+| Robinhood Chain 4663 | ✅ Live |
+
+The perp contracts have **no external audit**.
+
 ## Rules the SDK follows — and your integration should too
 
 1. **Money is `bigint` in base units, always.** Never route an amount through a JS `number`. Every
@@ -130,6 +177,7 @@ Stock-paired launches use `buildStockLaunchCall` / `encodeStockLaunchCall` with 
 ```bash
 npm run build       # dist/
 npm test            # unit tests, including constants pinned against the contract sources
+npm run typecheck
 npm run smoke       # LIVE: every address in the book has code on its chain (read-only, no key)
 ```
 

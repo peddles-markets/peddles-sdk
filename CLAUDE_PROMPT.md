@@ -7,9 +7,10 @@ has to follow, so it can wire Peddles in without guessing.
 ---
 
 You are integrating **Peddles** into this codebase using the `@peddles/sdk` TypeScript package
-(`github:peddles-markets/peddles-sdk`, peer dependency `viem@^2`). Peddles is a multi-chain
+(`npm i @peddles/sdk`, peer dependency `viem@^2`; source at github.com/peddles-markets/peddles-sdk). Peddles is a multi-chain
 launchpad for memecoins paired against **tokenised stocks** or ETH, on **Uniswap v4**, where every
-launch pool runs through one fee hook with terms fixed forever at launch. Website: https://peddles.xyz ·
+launch pool runs through one fee hook with terms fixed forever at launch. It also runs a **perp
+launchpad**: a coin whose v4 pool carries leveraged longs and shorts (Base and Robinhood Chain). Website: https://peddles.xyz ·
 docs: https://docs.peddles.xyz.
 
 ## What to build
@@ -23,11 +24,12 @@ Ask me which of these I want before writing code, then build only those:
 3. **Trade links / discovery** — link tokens to their chain explorer and to https://peddleswap.xyz or
    https://terminal.peddles.xyz.
 4. **NFT graduation** — Art→DEX / NFT→stock graduation requests and NFT-holder fee claims.
+5. **Perp market launch** — let a user create a perp market (`PeddlesPerpFactory.create`) and sign it.
 
 ## Install
 
 ```bash
-npm install github:peddles-markets/peddles-sdk viem
+npm i @peddles/sdk viem
 ```
 
 ## The SDK surface you will use
@@ -53,6 +55,13 @@ import {
   randomSalt, mineSalt, validateFeeTerms, feeSplitRate, parseTaxPercent, formatTaxPercent,
   readLaunchVariants, variantForType, decodeLaunchRevert, explainLaunchRevert,
 } from '@peddles/sdk/launch';
+
+// Perps: the perp launchpad (PeddlesPerpFactory) — addresses, live base reads, create calldata
+import {
+  perpChains, hasPerps, perpContracts, PerpsUnavailableError, readPerpBase,
+  isValidPerpHookAddress, predictPerpHook, predictPerpToken, buildPerpCreate,
+  perpFactoryAbi, perpErrorsAbi, PERP_HOOK_FLAGS,
+} from '@peddles/sdk/perps';
 ```
 
 Read the package's `README.md` and the `.d.ts` files in `node_modules/@peddles/sdk/dist` for exact
@@ -60,8 +69,7 @@ signatures before calling anything; do not invent parameters.
 
 ## Chains — resolve everything from the active chain, never hardcode one
 
-- Live today: **Base 8453 (mainnet)**, **Robinhood Chain 4663 (mainnet)** and **Sepolia 11155111
-  (testnet)**. Coming soon: Arc 5042, BNB Smart Chain 56. `supportedChains()` is the source of truth — call it, don't copy
+- Live today: **Base 8453 (mainnet)** and **Robinhood Chain 4663 (mainnet)**. Coming soon: Arc 5042, BNB Smart Chain 56. `supportedChains()` is the source of truth — call it, don't copy
   this list.
 - Take the chain from the user's wallet / app config. If `isKnownChain(chainId)` is false, **disable the
   Peddles feature and say so**; never fall back to another chain's addresses. The same contract name has
@@ -70,7 +78,6 @@ signatures before calling anything; do not invent parameters.
 - External addresses (WETH, Uniswap PoolManager, stock tokens) differ per chain too — read them from the
   chain (the launch plan does this: `buildWethLaunchPlan` reads the pool manager, WETH and hook from the
   liquidity executor) rather than pasting constants.
-- Sepolia's stock legs are **mocks with no dollar value**. Never show a USD figure for a testnet asset.
 - Block times differ (Base ~2 s, Robinhood Chain counts Ethereum L1 blocks inside the EVM). Never convert
   "blocks" to time with another chain's number.
 
@@ -108,6 +115,26 @@ signatures before calling anything; do not invent parameters.
   registered on the chain must not be offered.
 - On failure, show `decodeLaunchRevert(error)` / `explainLaunchRevert(...)` — a reason in words, not a hex
   blob. Never report success until the receipt says `status: success`.
+
+## Perps — launching a perp market
+
+- Perps exist only where `hasPerps(chainId)` is true (Base 8453, Robinhood Chain 4663).
+  `perpContracts(chainId)` throws on any other chain: disable the feature, never borrow another chain's
+  factory.
+- **Read the base live.** `readPerpBase(client, chainId, base)` returns `{ allowed, v, tickWidth }` as
+  bigints. Offer a base only while `allowed` is true; the creator has no curve choice, every market on a
+  base uses the factory's `v`/`tickWidth`. `baseCandidates` in `perpContracts()` is a list to ask about,
+  not an answer.
+- **You mine the hook salt.** Read `tokenInitCodeHash(name, symbol, tokenUri)` and then
+  `hookInitCodeHash(token)` from the factory, loop `predictPerpHook(hookDeployer, salt, hash)` from a
+  random 32-byte salt until `isValidPerpHookAddress(address)` (≈16k attempts — do it in a Web Worker),
+  then confirm both addresses with the factory's `predictToken` / `predictHook` before building.
+- `buildPerpCreate({...})` returns `{ to, data, value: 0n }`. `create` is not payable. An optional
+  `seedBuyBase` (bigint, base units) is pulled with `transferFrom`: approve exactly that amount to the
+  factory first, never an unlimited approval. Simulate before asking the user to sign; decode failures
+  with `perpErrorsAbi`.
+- Name, symbol and token URI are permanent. Perp contracts have no external audit — say so where a user
+  commits money.
 
 ## UI rules
 

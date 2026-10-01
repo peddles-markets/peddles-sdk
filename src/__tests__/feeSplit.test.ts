@@ -131,7 +131,8 @@ test('root entry exports the split, the terms read, and the fee-hook ABI', () =>
   assert.equal(rootEntry.feeSplit, feeSplit);
   assert.equal(typeof rootEntry.getPoolTerms, 'function');
   assert.ok(rootEntry.feeHookAbi.some((e) => e.type === 'function' && e.name === 'poolConfig'));
-  assert.ok(!('PeddlesCreatorFeeHook' in rootEntry.DEPLOYMENTS[11155111]), 'retired contract is not shipped');
+  for (const id of [4663, 8453] as const) assert.ok(!('PeddlesCreatorFeeHook' in rootEntry.DEPLOYMENTS[id]), 'retired contract is not shipped');
+  assert.ok(!('11155111' in rootEntry.DEPLOYMENTS), 'the published address book is mainnet only');
 });
 
 test('computeTokenAddress is the factory CREATE2 formula', () => {

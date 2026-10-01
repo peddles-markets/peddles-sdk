@@ -1,11 +1,13 @@
 {
   "name": "@peddles/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Read and build against Peddles launches — memecoins paired to tokenised stocks.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://peddles.xyz",
   "repository": {
     "type": "git",
@@ -53,13 +55,22 @@
       "import": "./dist/launch/index.js",
       "default": "./dist/launch/index.js"
     },
+    "./perps": {
+      "types": "./dist/perps/index.d.ts",
+      "import": "./dist/perps/index.js",
+      "default": "./dist/perps/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
+    "!dist/**/__tests__",
+    "!dist/**/*.test.*",
     "src",
-    "!src/__tests__",
+    "!src/**/__tests__",
+    "!src/**/*.test.ts",
     "README.md",
+    "CLAUDE_PROMPT.md",
     "LICENSE"
   ],
   "scripts": {

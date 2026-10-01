@@ -2,12 +2,14 @@ import type { ReadClient } from './client.js';
 /**
  * @peddles/sdk — read and build against Peddles launches.
  *
- * ONE PACKAGE, FOUR ENTRY POINTS. Take only what you import:
+ * ONE PACKAGE, SIX ENTRY POINTS. Take only what you import:
  *
  *   @peddles/sdk               this file — chain resolution, launch reads, pool terms
  *   @peddles/sdk/abis          ABI fragments alone, no runtime
  *   @peddles/sdk/clog          the Clog launch type
  *   @peddles/sdk/deployments   the address book
+ *   @peddles/sdk/launch        launch calldata builders, salts, revert decoding
+ *   @peddles/sdk/perps         the perp launchpad (PeddlesPerpFactory)
  *
  * `viem` is a PEER dependency, not a bundled one: an integrator already has a
  * client, and two copies of viem in a bundle is both bloat and a source of
