@@ -12,7 +12,7 @@ Read launches from the chain, build launch transactions for your users to sign, 
 went wrong when one reverts — with the same code the Peddles app runs.
 
 - 🌐 **Website:** [peddles.xyz](https://peddles.xyz) · **App:** [pro.peddles.xyz](https://pro.peddles.xyz) · **Swap:** [peddleswap.xyz](https://peddleswap.xyz) · **Terminal:** [terminal.peddles.xyz](https://terminal.peddles.xyz)
-- 📚 **Docs:** [docs.peddles.xyz](https://docs.peddles.xyz) · **Developers:** [dev.peddles.xyz](https://dev.peddles.xyz)
+- 📚 **Docs:** [docs.peddles.xyz](https://docs.peddles.xyz) · **Developers:** [docs.peddles.xyz/docs/sdk](https://docs.peddles.xyz/docs/sdk)
 - 🤖 **Integrating with an AI coding agent?** Paste [`CLAUDE_PROMPT.md`](./CLAUDE_PROMPT.md) into Claude (or any agent).
 
 ---
@@ -117,6 +117,8 @@ Stock-paired launches use `buildStockLaunchCall` / `encodeStockLaunchCall` with 
 ## Perps
 
 ```ts
+import { hexToBigInt, numberToHex, type Hex } from 'viem';
+import { randomSalt } from '@peddles/sdk/launch';
 import {
   perpContracts, readPerpBase, predictPerpToken, predictPerpHook,
   isValidPerpHookAddress, buildPerpCreate, perpFactoryAbi,
@@ -129,7 +131,7 @@ const weth = await readPerpBase(client, 8453, baseCandidates.WETH);
 if (!weth.allowed) throw new Error('perp launches on WETH are closed on this chain');
 
 // 1. The token address (any salt works).
-const tokenSalt = randomBytes32();
+const tokenSalt = randomSalt();
 const tokenHash = await client.readContract({ address: factory, abi: perpFactoryAbi,
   functionName: 'tokenInitCodeHash', args: [name, symbol, tokenUri] });
 const token = predictPerpToken(factory, tokenSalt, tokenHash);
@@ -137,9 +139,10 @@ const token = predictPerpToken(factory, tokenSalt, tokenHash);
 // 2. MINE the hook salt: v4 reads a hook's permissions from the low 14 bits of its address.
 const hookHash = await client.readContract({ address: factory, abi: perpFactoryAbi,
   functionName: 'hookInitCodeHash', args: [token] });
-let hookSalt = randomBytes32(), hook = predictPerpHook(hookDeployer, hookSalt, hookHash);
+const next = (s: Hex): Hex => numberToHex((hexToBigInt(s) + 1n) % 2n ** 256n, { size: 32 });
+let hookSalt = randomSalt(), hook = predictPerpHook(hookDeployer, hookSalt, hookHash);
 while (!isValidPerpHookAddress(hook)) {           // ~16k attempts on average — run it in a Web Worker
-  hookSalt = increment(hookSalt);
+  hookSalt = next(hookSalt);
   hook = predictPerpHook(hookDeployer, hookSalt, hookHash);
 }
 // Confirm both with the factory's own predictToken / predictHook before building.
