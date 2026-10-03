@@ -1,5 +1,5 @@
 import type { Address } from 'viem';
-import { addressOf, deploymentFor } from '../deployments.js';
+import { addressOf, deploymentFor, launchSaltBindingFor } from '../deployments.js';
 
 /**
  * The addresses a launch builder needs, per chain. INJECTED, never assumed:
@@ -18,6 +18,12 @@ export interface LaunchAddresses {
   readonly feeHook: Address;
   readonly stockLaunchpad: Address;
   readonly clogVaultFactory: Address | null;
+  /**
+   * How this chain's orchestrator derives a WETH-type launch's address: `'creator'` (bound to the
+   * sending wallet) or `'none'` (the raw salt — a chain not yet on the creator-bound orchestrator).
+   * From the chain's own record, never from a chain id. `buildWethLaunchPlan` follows it.
+   */
+  readonly saltBinding?: 'creator' | 'none';
 }
 
 const ZERO = /^0x0{40}$/i;
@@ -41,7 +47,15 @@ export function launchAddressesFromRecord(record: Readonly<Record<string, unknow
     feeHook: required(record, 'PeddlesFeeHook'),
     stockLaunchpad: required(record, 'PeddlesStockLaunchpad'),
     clogVaultFactory: typeof clog === 'string' && ADDRESS.test(clog) && !ZERO.test(clog) ? (clog as Address) : null,
+    saltBinding: saltBindingOf(record['launchSaltBinding']),
   };
+}
+
+/** A record's `launchSaltBinding`: `'creator'`, or absent on a chain not yet promoted. Anything else is refused. */
+function saltBindingOf(value: unknown): 'creator' | 'none' {
+  if (value === undefined || value === null) return 'none';
+  if (value !== 'creator') throw new Error(`Launch addresses: launchSaltBinding must be "creator" or absent (got ${JSON.stringify(value)}).`);
+  return 'creator';
 }
 
 /** From the SDK's shipped address book. Throws `UnknownChainError` for a chain it has none for. */
@@ -54,5 +68,6 @@ export function launchAddressesFor(chainId: number): LaunchAddresses {
     feeHook: addressOf(chainId, 'PeddlesFeeHook'),
     stockLaunchpad: addressOf(chainId, 'PeddlesStockLaunchpad'),
     clogVaultFactory: launchAddressesFromRecord(book).clogVaultFactory,
+    saltBinding: launchSaltBindingFor(chainId),
   };
 }

@@ -70,10 +70,28 @@ export interface WethLaunchPlan {
 
 export interface WethPlanArgs {
   readonly salt: `0x${string}`;
+  /**
+   * The account that will SEND the launch (`msg.sender` at the orchestrator; for a handle launch,
+   * the handle launcher, with `salt` = `handleSalt(wallet, salt)`). Since 2026-10-01 the
+   * orchestrator binds the salt to it, so the predicted address is a function of
+   * (creator, variant, salt). REQUIRED: there is no creator-less address.
+   */
+  readonly creator: `0x${string}`;
   /** The locally mined address this salt must produce; the factory must agree or the plan fails closed. */
   readonly expectedToken?: `0x${string}` | null;
   /** The factory's variant id, as the creator chose it. REQUIRED — there is no default type. */
   readonly variant: number;
+  /**
+   * How the chain's orchestrator derives the address. Leave it unset: it is then taken from
+   * `addresses.saltBinding`, which `launchAddressesFor` / `launchAddressesFromRecord` read from the
+   * chain's own record, and is `'creator'` when the addresses carry none (the bound orchestrator:
+   * `predictLaunchToken(creator, variant, salt)`). `'none'` is ONLY for a chain whose deployment
+   * record has not been promoted to the bound orchestrator yet (no `launchSaltBinding` in
+   * `deployments/<chainId>.json`): the address is then the factory's raw-salt
+   * `getPeddlesAddress(variant, orchestrator, salt)`, and anyone who sees the salt can take it.
+   * Decide it from the chain's record, never from a chain id.
+   */
+  readonly saltBinding?: 'creator' | 'none';
 }
 
 export async function buildWethLaunchPlan(
@@ -83,6 +101,7 @@ export async function buildWethLaunchPlan(
 ): Promise<WethLaunchPlan> {
   const { orchestrator, factory, liquidityExecutor } = addresses;
   const variant = args.variant;
+  const saltBinding = args.saltBinding ?? addresses.saltBinding ?? 'creator';
 
   const config = await client.multicall({
     allowFailure: false,
@@ -98,7 +117,11 @@ export async function buildWethLaunchPlan(
       { address: orchestrator, abi: launchOrchestratorAbi, functionName: 'defaultAirdropBps' },
       { address: orchestrator, abi: launchOrchestratorAbi, functionName: 'defaultVestingBps' },
       { address: orchestrator, abi: launchOrchestratorAbi, functionName: 'defaultBurnBps' },
-      { address: factory, abi: factoryAbi, functionName: 'getPeddlesAddress', args: [variant, orchestrator, args.salt] },
+      // Creator-bound: the orchestrator's own prediction for THIS sender (never the factory's raw-salt
+      // address) — unless the chain's record says its orchestrator predates the binding.
+      saltBinding === 'none'
+        ? { address: factory, abi: factoryAbi, functionName: 'getPeddlesAddress', args: [variant, orchestrator, args.salt] }
+        : { address: orchestrator, abi: launchOrchestratorAbi, functionName: 'predictLaunchToken', args: [args.creator, variant, args.salt] },
       { address: factory, abi: factoryAbi, functionName: 'isVariantSupported', args: [variant] },
       { address: orchestrator, abi: launchOrchestratorAbi, functionName: 'feeHook' },
     ],
@@ -149,7 +172,7 @@ export async function buildWethLaunchPlan(
   }
   if (args.expectedToken && predictedToken.toLowerCase() !== args.expectedToken.toLowerCase()) {
     throw new Error(
-      'The factory predicts a different address for this launch than the one reserved for it. Launching is disabled rather than sending it somewhere else.',
+      'The launch contract predicts a different address for this launch than the one reserved for it. Launching is disabled rather than sending it somewhere else.',
     );
   }
 

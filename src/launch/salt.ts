@@ -1,4 +1,4 @@
-import { concat, encodeAbiParameters, getAddress, keccak256 } from 'viem';
+import { concat, encodeAbiParameters, getAddress, keccak256, toBytes } from 'viem';
 
 /**
  * Salt handling for the two CREATE2 launch paths — a pure port of the web app's
@@ -13,7 +13,11 @@ import { concat, encodeAbiParameters, getAddress, keccak256 } from 'viem';
  *
  *   1. It picks the address. Both contracts mix the variant AND `msg.sender`
  *      into it (`keccak256(abi.encode(variant, sender, salt))`), so a salt only
- *      ever addresses the caller's OWN CREATE2 space.
+ *      ever addresses the caller's OWN CREATE2 space. On the WETH/USDC/WBNB and
+ *      Clog path `msg.sender` at the factory is the ORCHESTRATOR, so since
+ *      2026-10-01 the orchestrator first binds the salt to the CREATOR
+ *      (`launchSalt`), and the handle launcher binds it to the launching wallet
+ *      before that (`handleSalt`). Pass those layers as `MineParams.preBind`.
  *   2. It defeats front-running. The token address is an input to the pool key,
  *      so anyone who can predict it can open that pool first at a price of their
  *      choosing — the launch then reverts `POOL_PRICE_MISMATCH`. Mining starts
@@ -40,6 +44,73 @@ export function boundSalt(variant: number, sender: `0x${string}`, salt: `0x${str
       [variant, sender, salt],
     ),
   );
+}
+
+/** `keccak256("PEDDLES_V20_LAUNCH_SALT")` — `PeddlesLaunchOrchestratorV20.LAUNCH_SALT_DOMAIN`. */
+export const LAUNCH_SALT_DOMAIN: `0x${string}` = keccak256(toBytes('PEDDLES_V20_LAUNCH_SALT'));
+/** `keccak256("PEDDLES_HANDLE_LAUNCH_SALT")` — `PeddlesHandleLauncher.HANDLE_SALT_DOMAIN`. */
+export const HANDLE_SALT_DOMAIN: `0x${string}` = keccak256(toBytes('PEDDLES_HANDLE_LAUNCH_SALT'));
+
+/** One account binding applied to a salt BEFORE the deployer's own `(variant, sender, ·)` binding. */
+export interface SaltBinding {
+  readonly domain: `0x${string}`;
+  readonly account: `0x${string}`;
+}
+
+/** `keccak256(abi.encode(bytes32 domain, address account, bytes32 salt))`. */
+export function domainBoundSalt(domain: `0x${string}`, account: `0x${string}`, salt: `0x${string}`): `0x${string}` {
+  return keccak256(
+    encodeAbiParameters(
+      [{ type: 'bytes32' }, { type: 'address' }, { type: 'bytes32' }],
+      [domain, account, salt],
+    ),
+  );
+}
+
+/**
+ * `PeddlesLaunchOrchestratorV20.launchSalt(creator, salt)` — the salt the orchestrator hands the
+ * factory for a launch SENT BY `creator`. The address is therefore bound to the creator: the same
+ * salt from any other account lands somewhere else.
+ */
+export function launchSalt(creator: `0x${string}`, salt: `0x${string}`): `0x${string}` {
+  return domainBoundSalt(LAUNCH_SALT_DOMAIN, creator, salt);
+}
+
+/** `PeddlesHandleLauncher.handleSalt(launcher, salt)` — the launching wallet's binding of a handle launch's salt. */
+export function handleSalt(launcher: `0x${string}`, salt: `0x${string}`): `0x${string}` {
+  return domainBoundSalt(HANDLE_SALT_DOMAIN, launcher, salt);
+}
+
+/** Apply `preBind` in order — what the deployer contract finally receives as its salt. */
+export function applySaltBindings(salt: `0x${string}`, preBind: readonly SaltBinding[] = []): `0x${string}` {
+  let out = salt;
+  for (const b of preBind) out = domainBoundSalt(b.domain, b.account, out);
+  return out;
+}
+
+/**
+ * The bindings for each launch path, in the order the contracts apply them. The deployer's own
+ * `(variant, sender, ·)` binding comes after these and is described by `MineParams`.
+ *
+ *   orchestrator (WETH/USDC/WBNB, Clog):  deployer = factory,  sender = orchestrator,
+ *                                          preBind = orchestratorBindings(creator)
+ *   handle, quote leg:                     deployer = factory,  sender = orchestrator,
+ *                                          preBind = handleQuoteBindings(wallet, handleLauncher)
+ *   handle, stock leg:                     deployer = stock launchpad, sender = handleLauncher,
+ *                                          preBind = handleStockBindings(wallet)
+ *   stock launchpad, direct:               no preBind (it binds to msg.sender itself)
+ */
+export function orchestratorBindings(creator: `0x${string}`): readonly SaltBinding[] {
+  return [{ domain: LAUNCH_SALT_DOMAIN, account: creator }];
+}
+export function handleQuoteBindings(wallet: `0x${string}`, handleLauncher: `0x${string}`): readonly SaltBinding[] {
+  return [
+    { domain: HANDLE_SALT_DOMAIN, account: wallet },
+    { domain: LAUNCH_SALT_DOMAIN, account: handleLauncher },
+  ];
+}
+export function handleStockBindings(wallet: `0x${string}`): readonly SaltBinding[] {
+  return [{ domain: HANDLE_SALT_DOMAIN, account: wallet }];
 }
 
 /** Standard CREATE2: `keccak256(0xff ‖ deployer ‖ salt ‖ initCodeHash)[12:]`. */
@@ -81,6 +152,13 @@ export interface MineParams {
   /** The `msg.sender` the contract binds the salt to — the creator, or the orchestrator. */
   readonly sender: `0x${string}`;
   readonly initCodeHash: `0x${string}`;
+  /**
+   * Account bindings applied to the caller salt BEFORE the deployer's own — see
+   * `orchestratorBindings` / `handleQuoteBindings` / `handleStockBindings`. REQUIRED in practice
+   * on the orchestrator and handle paths: mining without them finds a salt for an address the
+   * bound contracts will never deploy to, and the plan's prediction check then fails closed.
+   */
+  readonly preBind?: readonly SaltBinding[];
   readonly suffix?: string;
   /** Anything with an `aborted` flag — an `AbortSignal`, or a plain object a caller flips. */
   readonly signal?: { readonly aborted: boolean };
@@ -148,6 +226,7 @@ export async function mineSalt(params: MineParams): Promise<MinedSalt> {
     variant,
     sender,
     initCodeHash,
+    preBind = [],
     suffix = ADDRESS_SUFFIX,
     signal,
     onProgress,
@@ -163,8 +242,24 @@ export async function mineSalt(params: MineParams): Promise<MinedSalt> {
   const bound = new Uint8Array(96);
   bound[31] = variant & 0xff;
   bound.set(hexToBytes(sender), 32 + 12);
-  const saltView = bound.subarray(64, 96);
+  // The caller salt. With no pre-binding it IS the third word of `bound`; with pre-bindings each
+  // layer is abi.encode(bytes32 domain, address account, bytes32 previous), hashed in order.
+  const layers = preBind.map((b) => {
+    const buf = new Uint8Array(96);
+    buf.set(hexToBytes(b.domain), 0);
+    buf.set(hexToBytes(b.account), 32 + 12);
+    return buf;
+  });
+  const saltView = layers.length === 0 ? bound.subarray(64, 96) : new Uint8Array(32);
   saltView.set(hexToBytes(randomSalt()));
+  const applyLayers = () => {
+    let cur: Uint8Array = saltView;
+    for (const buf of layers) {
+      buf.set(cur, 64);
+      cur = keccak256(buf, 'bytes');
+    }
+    bound.set(cur, 64);
+  };
 
   // 0xff ‖ deployer ‖ boundSalt ‖ initCodeHash.
   const create2 = new Uint8Array(85);
@@ -185,6 +280,7 @@ export async function mineSalt(params: MineParams): Promise<MinedSalt> {
     if (signal?.aborted) throw new MiningAbortedError();
 
     for (let i = 0; i < CHUNK && attempts < maxAttempts; i += 1) {
+      if (layers.length !== 0) applyLayers();
       create2.set(keccak256(bound, 'bytes'), 21);
       const digest = keccak256(create2, 'bytes');
       attempts += 1;
@@ -198,7 +294,7 @@ export async function mineSalt(params: MineParams): Promise<MinedSalt> {
       }
       if (hit) {
         const salt = bytesToHex(saltView);
-        const address = create2Address(deployer, boundSalt(variant, sender, salt), initCodeHash);
+        const address = create2Address(deployer, boundSalt(variant, sender, applySaltBindings(salt, preBind)), initCodeHash);
         if (!hasSuffix(address, suffix)) {
           throw new Error('The address miner disagreed with itself; nothing was reserved.');
         }

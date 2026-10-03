@@ -23,8 +23,8 @@ went wrong when one reverts — with the same code the Peddles app runs.
 | --- | --- | --- | --- |
 | **Base** | 8453 | ✅ Live — mainnet | [base.blockscout.com](https://base.blockscout.com) · [basescan.org](https://basescan.org) |
 | **Robinhood Chain** | 4663 | ✅ Live — mainnet | [robin.etherscan.io](https://robin.etherscan.io) |
-| Arc | 5042 | 🔜 Coming soon | — |
-| BNB Smart Chain | 56 | 🔜 Coming soon | [bscscan.com](https://bscscan.com) |
+| **BNB Smart Chain** | 56 | ✅ Live — mainnet | [bscscan.com](https://bscscan.com) |
+| **Arc** | 5042 | ✅ Live — mainnet (no stock pairs yet; gas and the ETH-type quote are USDC) | [explorer.arc.io](https://explorer.arc.io) |
 
 The SDK ships an address book **only for chains with a live deployment**. `supportedChains()` is the
 source of truth; a chain that is not in it throws `UnknownChainError` rather than falling back to
@@ -36,7 +36,7 @@ before it was published (`npm run smoke` re-checks them live).
 | Feature | What it is |
 | --- | --- |
 | **Stock-paired launches** | A coin whose pool is paired against a tokenised stock (Coinbase B20 on Base, Robinhood tokens on 4663, bStocks on BSC). Holders are rewarded in that stock. |
-| **ETH-paired launches** | The classic shape — a coin paired against WETH on Uniswap v4. |
+| **ETH-paired launches** | The classic shape — a coin paired against the chain's wrapped gas asset on Uniswap v4: WETH on Base and Robinhood Chain, WBNB on BNB Smart Chain, and USDC on Arc (where USDC is the gas). |
 | **Clog launches** | A launch type that holds back a slice of supply and releases it into the pool in small, time-spaced slices (≤ 3 hours for the whole clog). |
 | **Handle launches** | Launches whose creator fees accrue to an X (Twitter) account's pot, claimable by that account. |
 | **NFT bonding → DEX** | NFT collections sold on a bonding curve that graduate automatically into a DEX pool when they sell out. |
@@ -68,7 +68,7 @@ import { supportedChains, addressOf, getTokenInfo, getPoolTerms, feeSplit } from
 
 const client = createPublicClient({ chain: base, transport: http() });
 
-supportedChains();                           // [4663, 8453]
+supportedChains();                           // [56, 4663, 5042, 8453]
 addressOf(8453, 'PeddlesFactoryV20');        // 0x90bD4d38F621529b4aD6480c221075B7317b1978
 
 // Identity and supply, read from the token itself — never assume 18 decimals.
@@ -91,7 +91,10 @@ import {
 
 const addresses = launchAddressesFor(8453);
 const salt = randomSalt();   // or mineSalt({...}) for a vanity `…1978` token address, like the Peddles app
-const plan = await buildWethLaunchPlan(client, addresses, { salt, variant: 0 });   // 0 = plain launch
+// `creator` is the wallet that will SEND the launch: the token address is bound to it, so nobody who
+// copies the salt from a pending transaction can launch at that address. (Robinhood Chain moves to
+// the bound contracts later; `addresses.saltBinding` says which a chain uses and the plan follows it.)
+const plan = await buildWethLaunchPlan(client, addresses, { salt, creator: user, variant: 0 });   // 0 = plain launch
 const { launchFee: launchFeeWei } = await readOrchestratorLaunchFee(client, addresses.orchestrator); // read, never assumed
 
 const feeTerms = { taxBps: 300n, excessToCreatorBps: 5000n };                     // 3%, half the excess to holders

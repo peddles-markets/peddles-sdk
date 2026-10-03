@@ -27,9 +27,11 @@ import { addressOf, deploymentFor, isKnownChain, UnknownChainError } from './dep
 
 export {
   DEPLOYMENTS,
+  LAUNCH_SALT_BINDINGS,
   addressOf,
   deploymentFor,
   isKnownChain,
+  launchSaltBindingFor,
   UnknownChainError,
   UnknownContractError,
 } from './deployments.js';

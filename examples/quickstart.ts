@@ -30,7 +30,7 @@ export async function buildLaunch(user: Address) {
   const client = createPublicClient({ chain: base, transport: http() });
   const addresses = launchAddressesFor(8453);
   const salt = randomSalt();
-  const plan = await buildWethLaunchPlan(client, addresses, { salt, variant: 0 });
+  const plan = await buildWethLaunchPlan(client, addresses, { salt, creator: user, variant: 0 });
   const { launchFee: launchFeeWei } = await readOrchestratorLaunchFee(client, addresses.orchestrator);
   const feeTerms = { taxBps: 300n, excessToCreatorBps: 5000n };
   const issue = validateFeeTerms(feeTerms);

@@ -10,7 +10,7 @@
  * launch types answer, and the stock launchpad's fee reads. Exits 1 on the first chain that fails.
  */
 import { createPublicClient, http, parseAbi } from 'viem';
-import { base, sepolia } from 'viem/chains';
+import { base, bsc, sepolia } from 'viem/chains';
 import {
   DEPLOYMENTS,
   supportedChains,
@@ -20,8 +20,16 @@ import {
 } from '../dist/index.js';
 import { launchAddressesFor } from '../dist/launch/index.js';
 
-const VIEM_CHAINS = { 8453: base, 11155111: sepolia };
-const DEFAULT_RPC = { 8453: 'https://mainnet.base.org', 11155111: 'https://ethereum-sepolia-rpc.publicnode.com' };
+// Robinhood Chain (4663) and Arc (5042) are not in viem's registry; a chainless client reads fine.
+const VIEM_CHAINS = { 56: bsc, 8453: base, 11155111: sepolia };
+// Each chain's own official endpoint (the ones apps/web lists first); override with RPC_<chainId>.
+const DEFAULT_RPC = {
+  56: 'https://bsc-dataseed.bnbchain.org',
+  4663: 'https://rpc.mainnet.chain.robinhood.com',
+  5042: 'https://rpc.mainnet.arc.io',
+  8453: 'https://mainnet.base.org',
+  11155111: 'https://ethereum-sepolia-rpc.publicnode.com',
+};
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let failed = 0;

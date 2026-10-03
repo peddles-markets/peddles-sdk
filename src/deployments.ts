@@ -1,6 +1,6 @@
-import { DEPLOYMENTS, type KnownChainId, type ContractName } from './deployments.generated.js';
+import { DEPLOYMENTS, LAUNCH_SALT_BINDINGS, type KnownChainId, type ContractName } from './deployments.generated.js';
 
-export { DEPLOYMENTS };
+export { DEPLOYMENTS, LAUNCH_SALT_BINDINGS };
 export type { KnownChainId, ContractName };
 
 /** Thrown when the SDK is asked about a chain it ships no address book for. */
@@ -30,6 +30,16 @@ export class UnknownContractError extends Error {
 
 export function isKnownChain(chainId: number): chainId is KnownChainId {
   return Object.prototype.hasOwnProperty.call(DEPLOYMENTS, chainId);
+}
+
+/**
+ * How the chain's launch orchestrator derives a WETH-type launch's address, from the chain's own
+ * deployment record: `'creator'` (bound to the sending wallet) or `'none'` (the raw salt — a chain
+ * not yet on the creator-bound orchestrator). Throws `UnknownChainError` for a chain with no book.
+ */
+export function launchSaltBindingFor(chainId: number): 'creator' | 'none' {
+  if (!isKnownChain(chainId)) throw new UnknownChainError(chainId);
+  return LAUNCH_SALT_BINDINGS[chainId];
 }
 
 /**

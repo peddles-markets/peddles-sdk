@@ -15,6 +15,15 @@ export {
   ADDRESS_SUFFIX,
   ZERO_SALT,
   boundSalt,
+  LAUNCH_SALT_DOMAIN,
+  HANDLE_SALT_DOMAIN,
+  domainBoundSalt,
+  launchSalt,
+  handleSalt,
+  applySaltBindings,
+  orchestratorBindings,
+  handleQuoteBindings,
+  handleStockBindings,
   create2Address,
   hasSuffix,
   randomSalt,
@@ -22,7 +31,7 @@ export {
   MiningAbortedError,
   MiningExhaustedError,
 } from './salt.js';
-export type { MineParams, MinedSalt } from './salt.js';
+export type { MineParams, MinedSalt, SaltBinding } from './salt.js';
 
 export { MIN_TICK, MAX_TICK, Q96, getSqrtPriceAtTick, amountForLiquidity, liquidityForAmount, startSqrtPrice } from './tickMath.js';
 export type { LiquidityQuote } from './tickMath.js';
@@ -87,7 +96,10 @@ export type { DecodedLaunchRevert } from './revert.js';
 export {
   launchOrchestratorAbi,
   stockLaunchpadLaunchAbi,
+  handleLauncherLaunchAbi,
   liquidityExecutorLaunchAbi,
   tokenMetadataAbi,
   launchErrorsAbi,
 } from './abi.generated.js';
+
+export { predictLaunchToken, predictHandleQuoteToken, predictHandleStockToken } from './handle.js';

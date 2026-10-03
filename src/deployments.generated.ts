@@ -5,6 +5,32 @@
 
 /** Every Peddles contract address the SDK knows, by chain id. */
 export const DEPLOYMENTS = {
+  56: {
+    PeddlesClogVaultFactory: '0x019d6A0e4c8a0E585946eF12dCFA1e8E2f0BCd0b',
+    PeddlesFactoryV20: '0x220F5e98C3085E34EE68298847Fb63a3132D1978',
+    PeddlesFeeForwarder: '0x97b0d349FFE2eD262654C60dCC04d9622970Ae4F',
+    PeddlesFeeHook: '0x39D760601731025e0F02A3e5D232445797fAC0CC',
+    PeddlesHandleLauncher: '0x328F5E4C10a410c85fF081823d97E07d8E931978',
+    PeddlesHandlePotFactory: '0xeb4151af845A51a8d14917fA9dC47cAd208bEf8D',
+    PeddlesHolderRewardsFactory: '0xa298E61fa142FD4b402ce1d03F0F5b2Ba6261978',
+    PeddlesLaunchOrchestratorV20: '0x87f4c95773eA0bD5dddF948e4F4Ef55a09791978',
+    PeddlesLiquidityActivationManager: '0xe01ba8A47da547BB72cD61100F3D50a627331978',
+    PeddlesNFTBondingGraduationOrchestratorV20: '0x6e3F734BAA78205f91404178AB5Cb0C04aB61978',
+    PeddlesNFTFactory: '0x533cBF74c6f2F0A96900F61A95E13D3c63d21978',
+    PeddlesNftFeeDistributorFactory: '0x623E59f26b9C277F4481D2418d4665d255E31978',
+    PeddlesNftLiquidityReserve: '0x8bE8A8EDefaD08345a8b53E1A6532E0ebF991978',
+    PeddlesNFTMarketplace: '0xD4682e185010f93a5Ce0Ba859cE3AD9c4FB11978',
+    PeddlesNftStockGraduationOrchestrator: '0x46B2Ade88b098c7b5e3AB29cAE44EBb016cb1978',
+    PeddlesRouteSwapRouter: '0xde677e2A912B0169716E10244921c90fbE88Dea3',
+    PeddlesStockLaunchpad: '0xB2dea73eC6673d13e020E1e4eA966321790e1978',
+    PeddlesStockSwapRouter: '0x593d9Df3aAAcDC0466462107C14AB9Edf2711978',
+    PeddlesStockVaultFactory: '0x252A47c58E82C2f26eF910F25f94203680111978',
+    PeddlesTransferValidator: '0x0bF567a2aaEe5426C3Db0519409367fC8b9d1978',
+    PeddlesV4LiquidityExecutor: '0x8e13c0713733294a2DED1DcE71Df9cb5F4251978',
+    PeddlesV4SwapRouter: '0x2ab259c52e93ef0bD6deecF98D60e2494F221978',
+    PeddlesVaultFactoryV20: '0xDE0A7E2aACD433846483F80160c25CB310A91978',
+    PeddlesVaultRegistry: '0x3F6A92B1e758D4C95160C68859c79977A5d31978',
+  },
   4663: {
     PeddlesClogVaultFactory: '0x1d2142699F1D818203738226240C605243a39b9e',
     PeddlesFactoryV20: '0x51336A94B55Ad82D1099Dc82b27b151eDFfc1978',
@@ -34,16 +60,42 @@ export const DEPLOYMENTS = {
     PeddlesVaultFactoryV20: '0xe6EE48916F87DD8E8Cab9D100a5E9717aE731978',
     PeddlesVaultRegistry: '0xd322A44c4600dfDcF399Ceb7a32869e83d561978',
   },
+  5042: {
+    PeddlesClogVaultFactory: '0x019d6A0e4c8a0E585946eF12dCFA1e8E2f0BCd0b',
+    PeddlesFactoryV20: '0x1f9D8c53028d5289C9B206B6684bFC2BaC001978',
+    PeddlesFeeForwarder: '0xfe9563B7952fEB2091816133a22A4D62171fD77e',
+    PeddlesFeeHook: '0x317e34De0298F23bd41bf9A853289e227E9cC0CC',
+    PeddlesHandleLauncher: '0xA4336E83E3dd124Cd366705b5CC3C285BdfD1978',
+    PeddlesHandlePotFactory: '0xeb4151af845A51a8d14917fA9dC47cAd208bEf8D',
+    PeddlesHolderRewardsFactory: '0x5Db48C3EfcacBd42539C766d1B4f8c32C15B1978',
+    PeddlesLaunchOrchestratorV20: '0xe7666f1D0d7b9026CaCAe4a267c14CD490c01978',
+    PeddlesLiquidityActivationManager: '0x3A1a67005100DEB206be2f9C5Ae3B665d08d1978',
+    PeddlesNFTBondingGraduationOrchestratorV20: '0x586afEdc7721076BD854c1eF560f90AE48Aa1978',
+    PeddlesNFTFactory: '0x4f5199cA08864A85da6AB483Da93b8e40E501978',
+    PeddlesNftFeeDistributorFactory: '0x32fC87f491F9F5e5FDd93c2175828A12eAa81978',
+    PeddlesNftLiquidityReserve: '0x268C91647cD5d884B99Fa25C6141A83df8BA1978',
+    PeddlesNFTMarketplace: '0xa6Ac3Cc4126C171f948431D66b23ff5DFb861978',
+    PeddlesNftStockGraduationOrchestrator: '0x9aa971BA0698da9193535Dd0D1C70Af8945e1978',
+    PeddlesRouteSwapRouter: '0x3a6a8e21Fc09d27fc3f9Ad57E012dA69032149D4',
+    PeddlesStockLaunchpad: '0x6B176b9FDB11ffDc35dDdC0839EB62D537Ee1978',
+    PeddlesStockSwapRouter: '0x02DCd8b32F98905F54425c64B9FB8e9717d11978',
+    PeddlesStockVaultFactory: '0xF94B0Db7420A36a7E3c48c4F7907464B85241978',
+    PeddlesTransferValidator: '0x141313774788Cecb1a58B9d93653D6df862C1978',
+    PeddlesV4LiquidityExecutor: '0xD4F4b9cddbbf62E5Af822118EF7e5e08a1301978',
+    PeddlesV4SwapRouter: '0xDD4fBa27a668F616dBb0b10c0881480bFAc31978',
+    PeddlesVaultFactoryV20: '0x760707bad60FbFcC4CDb21A3C894770010841978',
+    PeddlesVaultRegistry: '0xD9d977FDc79B39f9c12c3D480E9ABd886F721978',
+  },
   8453: {
     PeddlesClogVaultFactory: '0x8563Aeec8C63d53BC8dfbE56FF9134a7b1e80503',
     PeddlesFactoryV20: '0x90bD4d38F621529b4aD6480c221075B7317b1978',
     PeddlesFeeForwarder: '0x77886951f19458B2FC27D4373553001A620264D3',
     PeddlesFeeHook: '0xAB8E39207718f519865D6f0d52eFB31b231D40cc',
     PeddlesFlywheel: '0x2E9366BF81d0D0ebA905927B55d3Fa3008891978',
-    PeddlesHandleLauncher: '0x265f0653aA62B30Fab11d0718D12CedE7965d7C4',
+    PeddlesHandleLauncher: '0xC4E82Bd9a0d3cfa00CdCc0de1ADfE0461B761978',
     PeddlesHandlePotFactory: '0xC2575Cc3Eb3934C826Fa33FC9BA2e6DA8186D725',
     PeddlesHolderRewardsFactory: '0xE4A89dCb02211409b50CEFd9B570E67dA2aD1978',
-    PeddlesLaunchOrchestratorV20: '0x7e7E62B41E447B6526E89D0AAAd7Cac9FB9f1978',
+    PeddlesLaunchOrchestratorV20: '0xB2f25Fd1b20269CD1553d63A942935Ab09F91978',
     PeddlesLiquidityActivationManager: '0xa8bfd83d21eec43F9a984C6B13a31Ce1df191978',
     PeddlesNFTBondingGraduationOrchestratorV20: '0xB7bB0f25B1AE59adcAa2787C68cd50296d2B1978',
     PeddlesNFTFactory: '0xd111413B91b0E31865464658071099779e2C1978',
@@ -62,9 +114,21 @@ export const DEPLOYMENTS = {
     PeddlesTransferValidator: '0xD1390f3E4741963A7eEd1E53163a1B09c97e1978',
     PeddlesV4LiquidityExecutor: '0x4Ca94531420F0e4f5a612475c8c4E35E9c8d1978',
     PeddlesV4SwapRouter: '0xbf7A709cBf71b303B856126D3aEb5051a07c1978',
-    PeddlesVaultFactoryV20: '0xD4fe62B8cd5a7e07fF09D6D1151fA5BC8A771978',
+    PeddlesVaultFactoryV20: '0x80d0B683B5e8D4B4e669d0367C62fC9893F11978',
     PeddlesVaultRegistry: '0xb390c4A83D8B308b378250a59F273A7c9aDF1978',
   },
+} as const;
+
+/**
+ * How each chain's launch orchestrator derives a WETH-type launch's address (the record's
+ * `launchSaltBinding`): 'creator' = bound to the sending wallet; 'none' = the raw salt, on a chain
+ * not yet on the creator-bound orchestrator.
+ */
+export const LAUNCH_SALT_BINDINGS = {
+  56: 'creator',
+  4663: 'none',
+  5042: 'creator',
+  8453: 'creator',
 } as const;
 
 /**

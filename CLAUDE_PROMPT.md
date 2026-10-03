@@ -69,12 +69,17 @@ signatures before calling anything; do not invent parameters.
 
 ## Chains — resolve everything from the active chain, never hardcode one
 
-- Live today: **Base 8453 (mainnet)** and **Robinhood Chain 4663 (mainnet)**. Coming soon: Arc 5042, BNB Smart Chain 56. `supportedChains()` is the source of truth — call it, don't copy
+- Live today: **Base 8453**, **Robinhood Chain 4663**, **BNB Smart Chain 56** and **Arc 5042** (all mainnet). Arc's gas is USDC and it has no stock pairs yet. `supportedChains()` is the source of truth — call it, don't copy
   this list.
 - Take the chain from the user's wallet / app config. If `isKnownChain(chainId)` is false, **disable the
   Peddles feature and say so**; never fall back to another chain's addresses. The same contract name has
   a different address on every chain, and a router or token address from one chain used on another is a
   real-money bug.
+- A launch's token address is bound to the wallet that sends it. `buildWethLaunchPlan` needs
+  `creator` (the sender) and follows `launchAddressesFor(chainId).saltBinding` — `'creator'` on Base,
+  BNB Smart Chain and Arc, `'none'` on a chain not yet on the bound contracts. Never pass a chain id
+  check of your own in its place, and when mining a vanity salt for a bound chain pass
+  `orchestratorBindings(creator)` to `mineSalt`.
 - External addresses (WETH, Uniswap PoolManager, stock tokens) differ per chain too — read them from the
   chain (the launch plan does this: `buildWethLaunchPlan` reads the pool manager, WETH and hook from the
   liquidity executor) rather than pasting constants.
