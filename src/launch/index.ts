@@ -100,6 +100,36 @@ export {
   liquidityExecutorLaunchAbi,
   tokenMetadataAbi,
   launchErrorsAbi,
+  snowballFactoryAbi,
+  snowballVaultAbi,
 } from './abi.generated.js';
+
+export {
+  snowballTerms,
+  snowballFeeTerms,
+  snowballMinSpend,
+  clogFloorAtOpen,
+  buildSnowballStockLaunch,
+  buildSnowballQuoteLaunch,
+  encodeSnowballLaunch,
+  predictSnowballVault,
+  predictSnowballStockToken,
+  predictSnowballQuoteToken,
+  prepareSnowballQuotePlan,
+  readSnowballVault,
+} from './snowball.js';
+export type {
+  SnowballSplit,
+  SnowballTermsResult,
+  SnowballTermsRefusal,
+  SnowballContractCall,
+  SnowballStockLaunchArgs,
+  SnowballStockLaunchCall,
+  SnowballQuoteLaunchArgs,
+  SnowballQuoteLaunchCall,
+  SnowballQuotePlan,
+  SnowballVaultState,
+} from './snowball.js';
+export { SNOWBALL_FACTORIES, snowballFactoryFor, requireSnowballFactory, SnowballUnavailableError } from '../deployments.js';
 
 export { predictLaunchToken, predictHandleQuoteToken, predictHandleStockToken } from './handle.js';

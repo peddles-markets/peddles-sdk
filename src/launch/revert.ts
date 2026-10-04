@@ -75,6 +75,17 @@ export const LAUNCH_REVERT_REASONS: Readonly<Record<string, string>> = {
   TooSoon: 'The next slice cannot be sold yet. Try again once the interval has passed.',
   NotCreator: 'Only this coin’s creator can do this.',
 
+  // ---- PeddlesSnowballFactory --------------------------------------------------
+  NoSnowball: 'A Snowball launch needs a burn share, a liquidity share, or both.',
+  VaultShareBelowCreatorLeg: 'Burn, liquidity and creator together must be at least 0.50% of volume.',
+  TaxOutOfBand: `The total trading tax must be between ${TAX_MIN}% and ${TAX_MAX}%.`,
+  TermsMismatch: 'The launch’s trading fee does not match its Snowball split. Prepare it again from the split.',
+  CreatorMustBeVault: 'The launch was built for a different creator than this wallet’s Snowball vault. Prepare it again for the signing wallet and salt.',
+  PredictionMismatch: 'The token did not deploy at the address Peddles previewed. Nothing launched; prepare again with a fresh salt.',
+  ClogFloorRequired: 'A Snowball launch of a type that holds supply back needs a release floor. Prepare it again.',
+  ZeroMinSpend: 'The Snowball vault’s minimum spend cannot be zero.',
+  WrongHook: 'The launch contracts on this network are not wired to the trading-fee contract the Snowball factory expects. Nothing launched.',
+
   // ---- shared ---------------------------------------------------------------
   REENTRANT: 'The contract rejected a nested call for safety. Nothing moved.',
   Reentrant: 'The contract rejected a nested call for safety. Nothing moved.',

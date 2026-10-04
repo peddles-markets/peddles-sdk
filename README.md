@@ -43,6 +43,7 @@ before it was published (`npm run smoke` re-checks them live).
 | **Art → DEX / NFT → stock graduation** | Collections graduating into a stock-paired coin, with an optional share of fees committed to NFT holders. |
 | **One fee model, fixed at launch** | Every launch pool runs through `PeddlesFeeHook`: the creator picks an all-in tax (1–10%) and the split of the excess between themselves and holders **in the launch transaction**, and nobody can change either afterwards. |
 | **Anti-sniper opening tax** | 20% on the first block, decaying to the pool's normal tax over ~3 minutes. The creator's own buy in the launch transaction pays the normal rate. |
+| **Snowball launches** | The creator fixes forever a split of the pool's tax, by volume, between buyback-and-burn, permanent liquidity, themselves and holders. A per-token vault is the creator of record, so nobody can change it afterwards. See [Snowball launches](#snowball-launches). |
 | **Holder rewards** | Paid in the pool's quote asset (a TSLA-paired coin pays TSLA), deployed and bound inside the launch transaction. |
 | **Uniswap v4 venue** | Pools are native Uniswap v4 pools, identified by the Peddles fee hook address. |
 | **Perps** | A perp launchpad (`PeddlesPerpFactory`) on **Base** and **Robinhood Chain**: one transaction launches a coin whose v4 pool carries leveraged longs and shorts against its own liquidity. See [Perps](#perps). |
@@ -116,6 +117,60 @@ try { /* send tx */ } catch (e) { console.log(decodeLaunchRevert(e)); }
 Stock-paired launches use `buildStockLaunchCall` / `encodeStockLaunchCall` with `readStockQuotes()`
 (the whitelisted stock legs) and `readStockLaunchFee()`. Clog and NFT helpers live in the root export
 (`getClogState`, `clogShareOfInflows`, `graduateAndBuyRequest`, …).
+
+## Snowball launches
+
+A Snowball launch fixes, in the launch transaction and **forever**, how the pool's tax is split **by
+volume** between buyback-and-burn, permanent full-range liquidity, the creator and holders, on top
+of the platform's fixed 0.50%. Example: a 5% tax = 0.5 platform / 1 burn / 1 LP / 1 creator / 1.5
+holders. A per-token `PeddlesSnowballVault` makes the launch call, so **the vault is the creator of
+record**: nobody (the creator, Peddles, the protocol Safe) can change the split or switch it off. The
+creator's share is forwarded to their wallet; bought-back tokens go to `0x…dEaD`; the vault's
+liquidity can never be removed. Describe it in those terms — a split of trading volume — never as a
+return or profit.
+
+```ts
+import {
+  launchAddressesFor, snowballTerms, snowballMinSpend, buildSnowballStockLaunch,
+  buildSnowballQuoteLaunch, prepareSnowballQuotePlan, encodeSnowballLaunch, encodeStockApproval,
+  readStockLaunchFee, readOrchestratorLaunchFee, readSnowballVault, randomSalt,
+} from '@peddles/sdk/launch';
+
+const addresses = launchAddressesFor(8453);          // addresses.snowballFactory: null where not deployed
+const split = { burnBps: 100, lpBps: 100, creatorBps: 100, holderBps: 150 };
+snowballTerms(split);   // { ok: true, taxBps: 500, excessToCreatorBps: 6250, exact: true } — mirrors termsFor
+const salt = randomSalt();
+
+// Stock-paired: approve the FACTORY (not the launchpad) for the first buy; value = the launchpad's fee.
+const { launchFee } = await readStockLaunchFee(client, addresses.stockLaunchpad);
+const stock = buildSnowballStockLaunch({
+  factory: addresses.snowballFactory, name: 'My Coin', symbol: 'MINE', quote, quoteIn, minTokensOut,
+  split, minSpend: snowballMinSpend(quoteDecimals), salt, launchFeeWei: launchFee,
+});
+await wallet.writeContract(stock);                   // { address, abi, functionName, args, value }
+
+// WETH / USDC (Arc) / WBNB (BSC) and Clog: the plan is built for the VAULT, checked live.
+const { vault, plan } = await prepareSnowballQuotePlan(client, addresses, { sender: user, salt, variant: 0 });
+const fee = await readOrchestratorLaunchFee(client, addresses.orchestrator);
+const quoteCall = buildSnowballQuoteLaunch({
+  factory: addresses.snowballFactory, orchestrator: addresses.orchestrator, saltBinding: addresses.saltBinding,
+  vault, name: 'My Coin', symbol: 'MINE', salt, metadata, plan, devBuyWei, minTokensOut,
+  launchFeeWei: fee.launchFee, split, minSpend: snowballMinSpend(18),
+});
+// Clog types: quoteCall.clogFloorX18 is the opening price, so held-back supply never sells below it.
+
+const state = await readSnowballVault(client, vaultAddress);   // terms, taxBps, buckets, lifetime totals
+```
+
+Availability, per chain (`snowballFactoryFor(chainId)`; every Snowball builder throws
+`SnowballUnavailableError` on a chain without a factory):
+
+| Chain | Stock-paired | WETH-type / Clog |
+| --- | --- | --- |
+| Base 8453, BNB Smart Chain 56, Arc 5042 | ✅ (Arc shows no stock pairs yet) | ✅ |
+| Robinhood Chain 4663 | ✅ | ⏳ needs the creator-bound orchestrator; its Safe batch is not signed yet, so the builders refuse (`saltBinding: 'none'`) |
+
+Handle launches with Snowball are not deployed yet and are not in this SDK.
 
 ## Perps
 

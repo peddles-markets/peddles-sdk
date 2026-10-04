@@ -54,6 +54,10 @@ import {
   readStockAllowance, readStockLaunchFee, readStockQuotes, isQuoteAllowed, predictStockCoin,
   randomSalt, mineSalt, validateFeeTerms, feeSplitRate, parseTaxPercent, formatTaxPercent,
   readLaunchVariants, variantForType, decodeLaunchRevert, explainLaunchRevert,
+  // Snowball launches (see "Snowball launches" below)
+  snowballTerms, snowballMinSpend, buildSnowballStockLaunch, buildSnowballQuoteLaunch,
+  prepareSnowballQuotePlan, encodeSnowballLaunch, predictSnowballVault, predictSnowballStockToken,
+  predictSnowballQuoteToken, readSnowballVault, snowballFactoryFor, SnowballUnavailableError,
 } from '@peddles/sdk/launch';
 
 // Perps: the perp launchpad (PeddlesPerpFactory) — addresses, live base reads, create calldata
@@ -120,6 +124,28 @@ signatures before calling anything; do not invent parameters.
   registered on the chain must not be offered.
 - On failure, show `decodeLaunchRevert(error)` / `explainLaunchRevert(...)` — a reason in words, not a hex
   blob. Never report success until the receipt says `status: success`.
+
+## Snowball launches — a fixed-forever split of trading volume
+
+- What it is: the creator picks, in the launch transaction, how the pool's tax is split **by volume**
+  between buyback-and-burn (bought on the coin's own pool, sent to `0x…dEaD`), permanent full-range
+  liquidity, the creator and holders, on top of the platform's fixed 0.50%. A per-token vault makes
+  the launch call, so **the vault is the creator of record**; nobody — the creator, Peddles, or the
+  protocol Safe — can change the split or switch it off. Say "fixed forever" and state each leg as a
+  percent of volume. **Never describe it as returns, yield or profit** for anyone.
+- Offer it only where `snowballFactoryFor(chainId)` (or `launchAddressesFor(chainId).snowballFactory`)
+  is non-null. Every Snowball builder and factory read throws `SnowballUnavailableError` without one; never
+  fall back to a plain launch.
+- Show the user `snowballTerms(split)` before they sign: the all-in tax and whether the split is exact.
+  A refusal (`ok: false`) carries the contract's own error name and a sentence — disable the launch.
+- Stock-paired: `buildSnowballStockLaunch`; the first buy is approved to the **Snowball factory**, not
+  the launchpad (`encodeStockApproval(quote, factory, quoteIn)`); `value` = `readStockLaunchFee().launchFee`.
+- WETH / USDC (Arc) / WBNB (BSC) and Clog: `prepareSnowballQuotePlan` (reads the vault, checks the
+  factory's wiring live and builds the plan for the vault) → `buildSnowballQuoteLaunch`. On Robinhood
+  Chain this path is refused until its creator-bound orchestrator is enabled; stock-paired works there.
+- `minSpend` is required and must be > 0: use `snowballMinSpend(quoteDecimals)`.
+- After launch, read a vault with `readSnowballVault` (terms, tax, burn/LP/creator buckets, lifetime
+  totals) — chain reads only. "Burned" is `totals.tokensBurned`, not a drop in `totalSupply`.
 
 ## Perps — launching a perp market
 

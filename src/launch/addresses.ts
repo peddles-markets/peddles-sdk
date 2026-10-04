@@ -1,5 +1,5 @@
 import type { Address } from 'viem';
-import { addressOf, deploymentFor, launchSaltBindingFor } from '../deployments.js';
+import { addressOf, deploymentFor, launchSaltBindingFor, snowballFactoryFor } from '../deployments.js';
 
 /**
  * The addresses a launch builder needs, per chain. INJECTED, never assumed:
@@ -24,6 +24,12 @@ export interface LaunchAddresses {
    * From the chain's own record, never from a chain id. `buildWethLaunchPlan` follows it.
    */
   readonly saltBinding?: 'creator' | 'none';
+  /**
+   * `PeddlesSnowballFactory`, or null on a chain without one — Snowball builders then refuse
+   * (`SnowballUnavailableError`) rather than launching a plain coin. Optional so address sets built
+   * before Snowball existed still type-check; absent means null.
+   */
+  readonly snowballFactory?: Address | null;
 }
 
 const ZERO = /^0x0{40}$/i;
@@ -48,7 +54,13 @@ export function launchAddressesFromRecord(record: Readonly<Record<string, unknow
     stockLaunchpad: required(record, 'PeddlesStockLaunchpad'),
     clogVaultFactory: typeof clog === 'string' && ADDRESS.test(clog) && !ZERO.test(clog) ? (clog as Address) : null,
     saltBinding: saltBindingOf(record['launchSaltBinding']),
+    snowballFactory: optional(record, 'PeddlesSnowballFactory'),
   };
+}
+
+function optional(record: Readonly<Record<string, unknown>>, name: string): Address | null {
+  const value = record[name];
+  return typeof value === 'string' && ADDRESS.test(value) && !ZERO.test(value) ? (value as Address) : null;
 }
 
 /** A record's `launchSaltBinding`: `'creator'`, or absent on a chain not yet promoted. Anything else is refused. */
@@ -69,5 +81,6 @@ export function launchAddressesFor(chainId: number): LaunchAddresses {
     stockLaunchpad: addressOf(chainId, 'PeddlesStockLaunchpad'),
     clogVaultFactory: launchAddressesFromRecord(book).clogVaultFactory,
     saltBinding: launchSaltBindingFor(chainId),
+    snowballFactory: snowballFactoryFor(chainId),
   };
 }

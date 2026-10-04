@@ -68,3 +68,43 @@ export function addressOf(chainId: number, name: string): `0x${string}` {
   if (!found || /^0x0{40}$/.test(found)) throw new UnknownContractError(chainId, name);
   return found;
 }
+
+/** Thrown when a Snowball call is asked of a chain with no `PeddlesSnowballFactory`. Fail closed. */
+export class SnowballUnavailableError extends Error {
+  readonly chainId: number | null;
+  constructor(chainId: number | null) {
+    super(
+      chainId === null
+        ? 'Snowball launches are not available on this chain: no PeddlesSnowballFactory is configured.'
+        : `Snowball launches are not available on chain ${chainId}: it has no PeddlesSnowballFactory.`,
+    );
+    this.name = 'SnowballUnavailableError';
+    this.chainId = chainId;
+  }
+}
+
+function snowballOf(book: Readonly<Record<string, unknown>>): `0x${string}` | null {
+  const v = Object.prototype.hasOwnProperty.call(book, 'PeddlesSnowballFactory') ? book['PeddlesSnowballFactory'] : undefined;
+  return typeof v === 'string' && /^0x[0-9a-fA-F]{40}$/.test(v) && !/^0x0{40}$/.test(v) ? (v as `0x${string}`) : null;
+}
+
+/**
+ * `PeddlesSnowballFactory` per shipped chain, `null` where it is not deployed. Derived from the
+ * generated address book, never typed by hand.
+ */
+export const SNOWBALL_FACTORIES: Readonly<Record<KnownChainId, `0x${string}` | null>> = Object.fromEntries(
+  Object.entries(DEPLOYMENTS).map(([id, book]) => [id, snowballOf(book as Readonly<Record<string, unknown>>)]),
+) as Record<KnownChainId, `0x${string}` | null>;
+
+/** The chain's Snowball factory, or `null` where it has none. Throws `UnknownChainError` for a chain with no book. */
+export function snowballFactoryFor(chainId: number): `0x${string}` | null {
+  if (!isKnownChain(chainId)) throw new UnknownChainError(chainId);
+  return SNOWBALL_FACTORIES[chainId];
+}
+
+/** The chain's Snowball factory, or a `SnowballUnavailableError`. Never a default. */
+export function requireSnowballFactory(chainId: number): `0x${string}` {
+  const f = snowballFactoryFor(chainId);
+  if (f === null) throw new SnowballUnavailableError(chainId);
+  return f;
+}

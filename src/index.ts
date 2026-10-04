@@ -34,7 +34,14 @@ export {
   launchSaltBindingFor,
   UnknownChainError,
   UnknownContractError,
+  SNOWBALL_FACTORIES,
+  snowballFactoryFor,
+  requireSnowballFactory,
+  SnowballUnavailableError,
 } from './deployments.js';
+export { snowballTerms, snowballFeeTerms, snowballMinSpend, readSnowballVault } from './launch/snowball.js';
+export type { SnowballSplit, SnowballTermsResult, SnowballTermsRefusal, SnowballVaultState } from './launch/snowball.js';
+export { snowballFactoryAbi, snowballVaultAbi } from './launch/abi.generated.js';
 export type { KnownChainId, ContractName } from './deployments.js';
 export type { ReadClient } from './client.js';
 

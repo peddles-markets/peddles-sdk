@@ -1,6 +1,6 @@
 {
   "name": "@peddles/sdk",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Read and build against Peddles launches — memecoins paired to tokenised stocks.",
   "license": "MIT",
   "type": "module",
@@ -70,6 +70,7 @@
     "!src/**/__tests__",
     "!src/**/*.test.ts",
     "README.md",
+    "CHANGELOG.md",
     "CLAUDE_PROMPT.md",
     "LICENSE"
   ],
