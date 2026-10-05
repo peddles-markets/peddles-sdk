@@ -43,12 +43,13 @@ test('perps ship for Base and Robinhood Chain, and every address is well-formed 
 test("perpContracts fails closed — never another chain's addresses", () => {
   assert.throws(() => perpContracts(1), UnknownChainError);
   assert.throws(() => perpContracts(Number.NaN), UnknownChainError);
-  // BNB Smart Chain and Arc ship an address book but no perps: the BSC perp stack is deployed and
-  // not live (no market until the Safe enables one), so its record is not promoted.
-  for (const id of [56, 5042]) {
-    assert.ok(!hasPerps(id), `no perps on ${id}`);
-    assert.throws(() => perpContracts(id), PerpsUnavailableError);
-  }
+  // Every shipped mainnet carries perps since 2026-10-04 (BSC and Arc Safes bound their factories):
+  // each resolves its OWN factory, never another chain's.
+  const factories = [8453, 4663, 56, 5042].map((id) => {
+    assert.ok(hasPerps(id), `perps on ${id}`);
+    return perpContracts(id).factory.toLowerCase();
+  });
+  assert.equal(new Set(factories).size, factories.length);
 });
 
 test('PerpsUnavailableError names the chain', () => {

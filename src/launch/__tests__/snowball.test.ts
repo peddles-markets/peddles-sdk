@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { decodeFunctionData } from 'viem';
+import { decodeFunctionData, encodeFunctionData } from 'viem';
 
 // The contract source pins the constants; the web parity lives in snowballParity.test.ts (monorepo only).
 import factorySource from '../../../contracts/src/PeddlesSnowballFactory.sol';
 import {
   buildSnowballQuoteLaunch,
+  buildHandleSnowballStockLaunch,
   buildSnowballStockLaunch,
   clogFloorAtOpen,
   encodeSnowballLaunch,
@@ -15,12 +16,20 @@ import {
   snowballTerms,
   type SnowballSplit,
 } from '../snowball.js';
-import { snowballFactoryAbi } from '../abi.generated.js';
+import { snowballFactoryAbi, snowballHandleFactoryAbi } from '../abi.generated.js';
 import { launchAddressesFor } from '../addresses.js';
 import type { ReadClient } from '../../client.js';
 import type { WethLaunchPlan } from '../wethPlan.js';
 import { EMPTY_WETH_METADATA } from '../wethCall.js';
-import { DEPLOYMENTS, SNOWBALL_FACTORIES, SnowballUnavailableError, requireSnowballFactory, snowballFactoryFor } from '../../deployments.js';
+import {
+  DEPLOYMENTS,
+  SNOWBALL_FACTORIES,
+  SNOWBALL_HANDLE_FACTORIES,
+  SnowballUnavailableError,
+  requireSnowballFactory,
+  snowballFactoryFor,
+  snowballHandleFactoryFor,
+} from '../../deployments.js';
 
 /**
  *   pnpm --filter @peddles/sdk test
@@ -232,4 +241,40 @@ test('every shipped chain resolves its Snowball factory from the book, or null',
     if (expected) assert.equal(requireSnowballFactory(id), expected);
   }
   assert.throws(() => snowballFactoryFor(1));
+});
+
+test('handle snowball: the oracle ticket goes first, the rest is the stock call; encodes against the handle factory ABI', () => {
+  const ticket = { xUserId: 44196397n, handleHash: SALT, deadline: 1_900_000_000n, sig: '0x1234' as const };
+  const call = buildHandleSnowballStockLaunch(ticket, {
+    factory: FACTORY,
+    name: 'Otter',
+    symbol: 'OTTR',
+    quote: '0x00000000000000000000000000000000000000aa',
+    quoteIn: 0n,
+    minTokensOut: 0n,
+    split: DEFAULT,
+    minSpend: snowballMinSpend(18),
+    salt: SALT,
+    launchFeeWei: 7n,
+  });
+  assert.equal(call.address, FACTORY);
+  assert.equal(call.value, 7n);
+  const data = encodeFunctionData({ abi: snowballHandleFactoryAbi, functionName: call.functionName, args: call.args });
+  const decoded = decodeFunctionData({ abi: snowballHandleFactoryAbi, data });
+  assert.equal(decoded.functionName, 'launchStock');
+  assert.deepEqual(decoded.args?.[0], ticket);
+  assert.deepEqual(decoded.args?.[2], DEFAULT);
+  assert.equal(decoded.args?.[4], SALT);
+  assert.throws(() => buildHandleSnowballStockLaunch({ ...ticket, xUserId: 0n }, { factory: FACTORY, name: 'O', symbol: 'O', quote: '0x00000000000000000000000000000000000000aa', quoteIn: 0n, minTokensOut: 0n, split: DEFAULT, minSpend: 1n, salt: SALT, launchFeeWei: 0n }));
+});
+
+test('handle snowball: every shipped chain resolves its own handle factory, distinct from the plain Snowball factory', () => {
+  for (const id of Object.keys(DEPLOYMENTS).map(Number)) {
+    const h = snowballHandleFactoryFor(id);
+    const s = snowballFactoryFor(id);
+    if (h === null) continue;
+    assert.match(h, /^0x[0-9a-fA-F]{40}$/);
+    assert.notEqual(h.toLowerCase(), s?.toLowerCase());
+  }
+  assert.equal(Object.values(SNOWBALL_HANDLE_FACTORIES).filter(Boolean).length >= 4, true);
 });

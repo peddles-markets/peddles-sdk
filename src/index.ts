@@ -38,10 +38,14 @@ export {
   snowballFactoryFor,
   requireSnowballFactory,
   SnowballUnavailableError,
+  SNOWBALL_HANDLE_FACTORIES,
+  snowballHandleFactoryFor,
 } from './deployments.js';
 export { snowballTerms, snowballFeeTerms, snowballMinSpend, readSnowballVault } from './launch/snowball.js';
 export type { SnowballSplit, SnowballTermsResult, SnowballTermsRefusal, SnowballVaultState } from './launch/snowball.js';
-export { snowballFactoryAbi, snowballVaultAbi } from './launch/abi.generated.js';
+export { snowballFactoryAbi, snowballHandleFactoryAbi, snowballVaultAbi } from './launch/abi.generated.js';
+export { buildHandleSnowballStockLaunch } from './launch/snowball.js';
+export type { HandleLaunchTicket, HandleSnowballStockLaunchCall } from './launch/snowball.js';
 export type { KnownChainId, ContractName } from './deployments.js';
 export type { ReadClient } from './client.js';
 

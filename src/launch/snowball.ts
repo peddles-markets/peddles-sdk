@@ -2,7 +2,7 @@ import { encodeFunctionData } from 'viem';
 import type { Address, Hex } from 'viem';
 import type { ReadClient } from '../client.js';
 import { SnowballUnavailableError } from '../deployments.js';
-import { snowballFactoryAbi, snowballVaultAbi } from './abi.generated.js';
+import { snowballFactoryAbi, snowballHandleFactoryAbi, snowballVaultAbi } from './abi.generated.js';
 import type { LaunchAddresses } from './addresses.js';
 import type { FeeTerms } from './feeTerms.js';
 import { buildWethLaunchInput, type UnsignedLaunchTx, type WethLaunchInput, type WethMetadata } from './wethCall.js';
@@ -184,6 +184,40 @@ export function buildSnowballStockLaunch(a: SnowballStockLaunchArgs): SnowballSt
     functionName: 'launchStock',
     args: [{ name: a.name, symbol: a.symbol, quote: a.quote, quoteIn: a.quoteIn, minTokensOut: a.minTokensOut }, split, a.minSpend, a.salt],
     value: a.launchFeeWei,
+  };
+}
+
+/** The oracle's ticket a handle launch carries (from the Peddles API's `POST /handle-launch/ticket`). */
+export interface HandleLaunchTicket {
+  readonly xUserId: bigint;
+  readonly handleHash: Hex;
+  readonly deadline: bigint;
+  readonly sig: Hex;
+}
+
+export interface HandleSnowballStockLaunchCall {
+  readonly address: Address;
+  readonly abi: typeof snowballHandleFactoryAbi;
+  readonly functionName: 'launchStock';
+  readonly args: readonly [HandleLaunchTicket, ...SnowballStockLaunchCall['args']];
+  readonly value: bigint;
+}
+
+/**
+ * `PeddlesSnowballHandleFactory.launchStock(ticket, StockLaunch, SnowballTerms, minSpend, salt)`: a
+ * Snowball launch FOR an X account — the creator share goes to that account's pot. Same arguments as
+ * `buildSnowballStockLaunch` with the oracle ticket in front; `factory` is the HANDLE factory
+ * (`snowballHandleFactoryFor(chainId)`). Approve the handle factory for `quoteIn`.
+ */
+export function buildHandleSnowballStockLaunch(ticket: HandleLaunchTicket, a: SnowballStockLaunchArgs): HandleSnowballStockLaunchCall {
+  const inner = buildSnowballStockLaunch(a);
+  if (ticket.xUserId <= 0n || ticket.deadline <= 0n) throw new Error('A handle launch needs a ticket from the Peddles API.');
+  return {
+    address: inner.address,
+    abi: snowballHandleFactoryAbi,
+    functionName: 'launchStock',
+    args: [ticket, ...inner.args],
+    value: inner.value,
   };
 }
 

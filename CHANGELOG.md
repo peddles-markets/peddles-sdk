@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 — Snowball handle launches, perps on every mainnet
+
+Added:
+
+- `SNOWBALL_HANDLE_FACTORIES`, `snowballHandleFactoryFor(chainId)` — `PeddlesSnowballHandleFactory` per
+  chain (null where not deployed). Live on Base, BNB Smart Chain, Arc and Robinhood Chain.
+- `buildHandleSnowballStockLaunch(ticket, args)` — a Snowball launch FOR an X account: the oracle ticket
+  (from the Peddles API) goes first and the creator share is paid to that account's pot. Approve the
+  handle factory for the first buy.
+- Generated ABI `snowballHandleFactoryAbi` (both entrypoints, predictors, vault/pot/launcher lookups,
+  `SnowballLaunched` and `HandleLaunched`).
+
+Changed:
+
+- Robinhood Chain launches are creator-bound (its Safe enabled the bound orchestrator 2026-10-04), so
+  `launchSaltBindingFor(4663)` is `creator` and early addresses are safe to share there too.
+- Perps: BNB Smart Chain and Arc carry perp records — `hasPerps` / `perpContracts` resolve every mainnet.
+
 ## 0.4.0 — Snowball launches
 
 A Snowball launch fixes, in the launch transaction and forever, how the pool's tax is split by

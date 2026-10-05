@@ -102,6 +102,22 @@ export function snowballFactoryFor(chainId: number): `0x${string}` | null {
   return SNOWBALL_FACTORIES[chainId];
 }
 
+function handleSnowballOf(book: Readonly<Record<string, unknown>>): `0x${string}` | null {
+  const v = Object.prototype.hasOwnProperty.call(book, 'PeddlesSnowballHandleFactory') ? book['PeddlesSnowballHandleFactory'] : undefined;
+  return typeof v === 'string' && /^0x[0-9a-fA-F]{40}$/.test(v) && !/^0x0{40}$/.test(v) ? (v as `0x${string}`) : null;
+}
+
+/** `PeddlesSnowballHandleFactory` per shipped chain (Snowball for handle launches), `null` where it is not deployed. */
+export const SNOWBALL_HANDLE_FACTORIES: Readonly<Record<KnownChainId, `0x${string}` | null>> = Object.fromEntries(
+  Object.entries(DEPLOYMENTS).map(([id, book]) => [id, handleSnowballOf(book as Readonly<Record<string, unknown>>)]),
+) as Record<KnownChainId, `0x${string}` | null>;
+
+/** The chain's handle-Snowball factory, or `null` where it has none. Throws `UnknownChainError` for a chain with no book. */
+export function snowballHandleFactoryFor(chainId: number): `0x${string}` | null {
+  if (!isKnownChain(chainId)) throw new UnknownChainError(chainId);
+  return SNOWBALL_HANDLE_FACTORIES[chainId];
+}
+
 /** The chain's Snowball factory, or a `SnowballUnavailableError`. Never a default. */
 export function requireSnowballFactory(chainId: number): `0x${string}` {
   const f = snowballFactoryFor(chainId);

@@ -101,6 +101,7 @@ export {
   tokenMetadataAbi,
   launchErrorsAbi,
   snowballFactoryAbi,
+  snowballHandleFactoryAbi,
   snowballVaultAbi,
 } from './abi.generated.js';
 
@@ -110,6 +111,7 @@ export {
   snowballMinSpend,
   clogFloorAtOpen,
   buildSnowballStockLaunch,
+  buildHandleSnowballStockLaunch,
   buildSnowballQuoteLaunch,
   encodeSnowballLaunch,
   predictSnowballVault,

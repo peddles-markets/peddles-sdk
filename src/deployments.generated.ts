@@ -21,8 +21,13 @@ export const DEPLOYMENTS = {
     PeddlesNftLiquidityReserve: '0x8bE8A8EDefaD08345a8b53E1A6532E0ebF991978',
     PeddlesNFTMarketplace: '0xD4682e185010f93a5Ce0Ba859cE3AD9c4FB11978',
     PeddlesNftStockGraduationOrchestrator: '0x46B2Ade88b098c7b5e3AB29cAE44EBb016cb1978',
+    PeddlesPerpFactory: '0x3720ca29d87e692000ca71c56a56a3ba05b00cd1',
+    PeddlesPerpHookDeployer: '0x2b5881c79a83c9eb17c67354f6737f3c9a120de2',
+    PeddlesPerpTreasury: '0xc572a003d0ab529da670a42177fc583b03d5b026',
     PeddlesRouteSwapRouter: '0xde677e2A912B0169716E10244921c90fbE88Dea3',
     PeddlesSnowballFactory: '0xe3c49423edFE54909BCB2B140eF15c401e645Bb1',
+    PeddlesSnowballHandleFactory: '0xB31C7DcAd2b1e10B7FF67F376bE7235cbcD50dC0',
+    PeddlesSnowballHandleVaultDeployer: '0x9096740D9134876fb1f3e464f27C8904f3E5c881',
     PeddlesSnowballVaultDeployer: '0xd1ea1A3c3FF0A1BF6b18ADA64ad04E424C86b6d5',
     PeddlesStockLaunchpad: '0xB2dea73eC6673d13e020E1e4eA966321790e1978',
     PeddlesStockSwapRouter: '0x593d9Df3aAAcDC0466462107C14AB9Edf2711978',
@@ -38,10 +43,10 @@ export const DEPLOYMENTS = {
     PeddlesFactoryV20: '0x51336A94B55Ad82D1099Dc82b27b151eDFfc1978',
     PeddlesFeeForwarder: '0xc572A003d0Ab529da670a42177Fc583b03D5b026',
     PeddlesFeeHook: '0xfe055282E3cD471A8b2cd922d31E75ECd3bBc0CC',
-    PeddlesHandleLauncher: '0x3720ca29D87E692000Ca71C56a56a3BA05B00CD1',
+    PeddlesHandleLauncher: '0x4930F82F2F92427CcFa1116ef0E68835328C1978',
     PeddlesHandlePotFactory: '0x2b5881c79a83C9EB17C67354F6737f3c9A120DE2',
     PeddlesHolderRewardsFactory: '0xB22d6D7B1eC296AA79cbFf4ABE4992A726BE1978',
-    PeddlesLaunchOrchestratorV20: '0x81213e2cE27f03714143152aE5cf5c94094f1978',
+    PeddlesLaunchOrchestratorV20: '0x8BD4Cdb2248E4a5443Acdf52b22FE1A4A2ca1978',
     PeddlesLiquidityActivationManager: '0xBE8d8999b53c5E5249feBafe5f505221F3e41978',
     PeddlesNFTBondingGraduationOrchestratorV20: '0x6C5032DeDCc78b92b370C86a2aA0EA3AD0D71978',
     PeddlesNFTFactory: '0x2e0029BeDCBb2f211Fd17EeBA8f40657cF6A1978',
@@ -54,6 +59,8 @@ export const DEPLOYMENTS = {
     PeddlesPerpTreasury: '0x2C322f48B2dD97f6c5050eDF5F349C7f70126dB5',
     PeddlesRouteSwapRouter: '0xA4858047F9c7359CC0d9071598BFA74187739d8D',
     PeddlesSnowballFactory: '0x8Bf9DD5E7a64e8818d170f857d146D34c48939E6',
+    PeddlesSnowballHandleFactory: '0xD0CF6a70B4aB609d95A34B60a9D09a3DA3362245',
+    PeddlesSnowballHandleVaultDeployer: '0x9051ed499E496f4D45F848698c7589d54667483E',
     PeddlesSnowballVaultDeployer: '0xe756a92cff0512BB87DeB784A6897f7a9E7b8a02',
     PeddlesStockLaunchpad: '0x4b7Aa977eA4B95D9859D73e6bc922ecF2F881978',
     PeddlesStockSwapRouter: '0x5A934c5eE47daa3b4562f9Dc9224bB00e9191978',
@@ -61,7 +68,7 @@ export const DEPLOYMENTS = {
     PeddlesTransferValidator: '0x2ADA0EA86925b5EbA1CF7B75e0d606C89b1B1978',
     PeddlesV4LiquidityExecutor: '0xAB23BD1234AB1BCa48a97aB8e2baaFAaE7A21978',
     PeddlesV4SwapRouter: '0xDd1F65380C9f7283A61FC489DCAceA352ee31978',
-    PeddlesVaultFactoryV20: '0xe6EE48916F87DD8E8Cab9D100a5E9717aE731978',
+    PeddlesVaultFactoryV20: '0x33c100477D9D2E5d0f0Ed9Ab82aa2ea62d601978',
     PeddlesVaultRegistry: '0xd322A44c4600dfDcF399Ceb7a32869e83d561978',
   },
   5042: {
@@ -80,8 +87,13 @@ export const DEPLOYMENTS = {
     PeddlesNftLiquidityReserve: '0x268C91647cD5d884B99Fa25C6141A83df8BA1978',
     PeddlesNFTMarketplace: '0xa6Ac3Cc4126C171f948431D66b23ff5DFb861978',
     PeddlesNftStockGraduationOrchestrator: '0x9aa971BA0698da9193535Dd0D1C70Af8945e1978',
+    PeddlesPerpFactory: '0xd1e164f574f4C1b47c6b9689EB5a035a89DD1Cd4',
+    PeddlesPerpHookDeployer: '0x13C6455A8fF03cFc0F8fd2bCe0a1ee092DF54731',
+    PeddlesPerpTreasury: '0x0afaD49ca7b0cB2913DA1ADA9e59e53918aE4fAF',
     PeddlesRouteSwapRouter: '0x3a6a8e21Fc09d27fc3f9Ad57E012dA69032149D4',
     PeddlesSnowballFactory: '0x2C322f48B2dD97f6c5050eDF5F349C7f70126dB5',
+    PeddlesSnowballHandleFactory: '0xde677e2A912B0169716E10244921c90fbE88Dea3',
+    PeddlesSnowballHandleVaultDeployer: '0x540f0E93E6a9bE2A44e6f0290004EAae296cfD8D',
     PeddlesSnowballVaultDeployer: '0x6Eb675f991c4B7645660aCbc289AF41528886724',
     PeddlesStockLaunchpad: '0x6B176b9FDB11ffDc35dDdC0839EB62D537Ee1978',
     PeddlesStockSwapRouter: '0x02DCd8b32F98905F54425c64B9FB8e9717d11978',
@@ -114,6 +126,8 @@ export const DEPLOYMENTS = {
     PeddlesPerpTreasury: '0xDB77eA86006E530D25789F2cf2aeB7bd2C7c3745',
     PeddlesRouteSwapRouter: '0x8f04A804Ba989d38A68D93eb8679d3a967f2b079',
     PeddlesSnowballFactory: '0x249fcF53b13f3bd27e2969D5A3DF6f6B96aCDaAb',
+    PeddlesSnowballHandleFactory: '0xa9657E7ECcf589bd9A3FD460bA4a610f310DfF1F',
+    PeddlesSnowballHandleVaultDeployer: '0xdB3869F858fF95d99725a6b4a8a3dFfc2689947E',
     PeddlesSnowballVaultDeployer: '0x2B86071De444F68931FA91EF26B71D2c34bcf3b9',
     PeddlesStockLaunchpad: '0x680805FBd0D6225d0bE4E12A2B73b2Ed83a31978',
     PeddlesStockSwapRouter: '0xd150B1E102493e4F35A1e95DdA80948C0e581978',
@@ -134,7 +148,7 @@ export const DEPLOYMENTS = {
  */
 export const LAUNCH_SALT_BINDINGS = {
   56: 'creator',
-  4663: 'none',
+  4663: 'creator',
   5042: 'creator',
   8453: 'creator',
 } as const;
@@ -145,6 +159,15 @@ export const LAUNCH_SALT_BINDINGS = {
  * allowed, and on what curve, is read live from `PeddlesPerpFactory.bases(base)`.
  */
 export const PERP_DEPLOYMENTS = {
+  56: {
+    PeddlesPerpFactory: '0x3720ca29d87e692000ca71c56a56a3ba05b00cd1',
+    PeddlesPerpHookDeployer: '0x2b5881c79a83c9eb17c67354f6737f3c9a120de2',
+    PeddlesPerpTreasury: '0xc572a003d0ab529da670a42177fc583b03d5b026',
+    hookCodePointer: '0x013c6dD8c493CbcbcD5457E0DE58300e2E7499c1',
+    baseCandidates: {
+      WETH: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+    },
+  },
   4663: {
     PeddlesPerpFactory: '0xCFA648281759C406E921F736c86ece2a9c4D1Fca',
     PeddlesPerpHookDeployer: '0x3ab1848069cE7d19CD62ffB645292146cDd0139F',
@@ -152,6 +175,15 @@ export const PERP_DEPLOYMENTS = {
     hookCodePointer: '0xf97907D6AA1Ae3D3Ec3247eEfA998C8D6BE78605',
     baseCandidates: {
       WETH: '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73',
+    },
+  },
+  5042: {
+    PeddlesPerpFactory: '0xd1e164f574f4C1b47c6b9689EB5a035a89DD1Cd4',
+    PeddlesPerpHookDeployer: '0x13C6455A8fF03cFc0F8fd2bCe0a1ee092DF54731',
+    PeddlesPerpTreasury: '0x0afaD49ca7b0cB2913DA1ADA9e59e53918aE4fAF',
+    hookCodePointer: '0x39A040c25F816dA21d3c67358Bc09b1536995A10',
+    baseCandidates: {
+      WETH: '0x3600000000000000000000000000000000000000',
     },
   },
   8453: {
