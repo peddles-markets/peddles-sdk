@@ -2736,3 +2736,1279 @@ export const routeSwapRouterAbi = [
     "inputs": []
   }
 ] as const;
+
+/** `PeddlesPartnerFeeForwarder` — a trade routed by a registered developer: the platform fee is shared with the partner named by a Peddles voucher, and the partner may add its own fee on top. Owner setters are absent. */
+export const partnerFeeForwarderAbi = [
+  {
+    "type": "function",
+    "name": "buyV4",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "minOut",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "tokensOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "sellV4",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "name": "minOutNet",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nativeNet",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buyRoute",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address"
+              }
+            ]
+          },
+          {
+            "name": "zeroForOne",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "minOut",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "tokensOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "sellRoute",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address"
+              }
+            ]
+          },
+          {
+            "name": "zeroForOne",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "minOutNet",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nativeNet",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buyExternal",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address"
+              }
+            ]
+          },
+          {
+            "name": "zeroForOne",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "minOut",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "tokensOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "sellExternal",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address"
+              }
+            ]
+          },
+          {
+            "name": "zeroForOne",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "minOutNet",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nativeNet",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buyRoutePancake",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "tokenIn",
+            "type": "address"
+          },
+          {
+            "name": "tokenOut",
+            "type": "address"
+          },
+          {
+            "name": "fee",
+            "type": "uint24"
+          }
+        ]
+      },
+      {
+        "name": "minOut",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "tokensOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "sellRoutePancake",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "name": "hops",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "tokenIn",
+            "type": "address"
+          },
+          {
+            "name": "tokenOut",
+            "type": "address"
+          },
+          {
+            "name": "fee",
+            "type": "uint24"
+          }
+        ]
+      },
+      {
+        "name": "minOutNet",
+        "type": "uint256"
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16"
+      },
+      {
+        "name": "p",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "partner",
+            "type": "address"
+          },
+          {
+            "name": "partnerFeeBps",
+            "type": "uint16"
+          },
+          {
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "name": "signature",
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nativeNet",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdraw",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawTo",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "claimable",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lastCreditAt",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalClaimable",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "partnerRevoked",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "partnerSigner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "partnerShareBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "minFeeBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "maxFeeBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "maxPartnerFeeBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "feeRecipient",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "v4SwapRouter",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "routeSwapRouter",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "domainSeparator",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "voucherDigest",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address"
+      },
+      {
+        "name": "expiry",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "voucherValid",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address"
+      },
+      {
+        "name": "expiry",
+        "type": "uint256"
+      },
+      {
+        "name": "signature",
+        "type": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "VOUCHER_TYPEHASH",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "CLAIM_STALE_AFTER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MAX_PARTNER_SHARE_BPS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "PARTNER_PAY_GAS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "PartnerBought",
+    "inputs": [
+      {
+        "name": "payer",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "router",
+        "type": "address",
+        "indexed": false
+      },
+      {
+        "name": "nativeIn",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "refund",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "tokensOut",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerSold",
+    "inputs": [
+      {
+        "name": "payer",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "router",
+        "type": "address",
+        "indexed": false
+      },
+      {
+        "name": "tokenIn",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "nativeGross",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "nativeNet",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerFees",
+    "inputs": [
+      {
+        "name": "payer",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "platformFee",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "partnerShare",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "partnerFee",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "toFeeRecipient",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "feeBps",
+        "type": "uint16",
+        "indexed": false
+      },
+      {
+        "name": "partnerFeeBps",
+        "type": "uint16",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerPaid",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerCredited",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "claimableAfter",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Withdrawn",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "StaleClaimReclaimed",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerRevokedSet",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "revoked",
+        "type": "bool",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerSignerSet",
+    "inputs": [
+      {
+        "name": "previous",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "next",
+        "type": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PartnerShareBpsSet",
+    "inputs": [
+      {
+        "name": "previous",
+        "type": "uint16",
+        "indexed": false
+      },
+      {
+        "name": "next",
+        "type": "uint16",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MinFeeBpsSet",
+    "inputs": [
+      {
+        "name": "previous",
+        "type": "uint16",
+        "indexed": false
+      },
+      {
+        "name": "next",
+        "type": "uint16",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "Locked",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidFee",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidPartnerFee",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RouterNotConfigured",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "Expired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "Slippage",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "VoucherExpired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BadVoucher",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PartnerIsRevoked",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NothingToWithdraw",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "GasTooLow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TransferFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NativeTransferFailed",
+    "inputs": []
+  }
+] as const;

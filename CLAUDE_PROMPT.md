@@ -22,7 +22,7 @@ Ask me which of these I want before writing code, then build only those:
 2. **Launch** — let a user create a coin (ETH-paired, stock-paired, or Clog) and sign it in their own
    wallet.
 3. **Trade links / discovery** — link tokens to their chain explorer and to https://peddleswap.xyz or
-   https://terminal.peddles.xyz.
+   https://peddles.xyz/terminal.
 4. **NFT graduation** — Art→DEX / NFT→stock graduation requests and NFT-holder fee claims.
 5. **Perp market launch** — let a user create a perp market (`PeddlesPerpFactory.create`) and sign it.
 
@@ -146,6 +146,24 @@ signatures before calling anything; do not invent parameters.
 - `minSpend` is required and must be > 0: use `snowballMinSpend(quoteDecimals)`.
 - After launch, read a vault with `readSnowballVault` (terms, tax, burn/LP/creator buckets, lifetime
   totals) — chain reads only. "Burned" is `totals.tokensBurned`, not a drop in `totalSupply`.
+
+## Partner trades — earn on the trades your app routes
+
+- If the app lets users trade Peddles tokens, route through `PeddlesPartnerFeeForwarder` with the
+  developer's voucher so they earn a share of the platform fee. Offer it only where
+  `partnerFeeForwarderFor(chainId)` is non-null; on any other chain, do not route partner trades.
+- Vouchers come from the developer's SERVER (`POST /api/v1/launch-api/partner/voucher` with an API key
+  holding `partner:voucher`), never from code that ships an API key to the browser. Parse them with
+  `parsePartnerVoucher`. A voucher is for one chain; renew before `expiry` (≤ 30 days).
+- Read `readPartnerTerms(client, forwarder)` live and pass `terms` to the builder, so a fee outside
+  `minFeeBps..maxFeeBps` or above `maxPartnerFeeBps` is refused before the wallet opens.
+- Show the trader both rates before they sign — the platform fee and the developer's own fee on top —
+  as percents of the trade. `partnerFeeSplit` gives the exact amounts the contract books.
+- Use the builders (`buildPartnerBuyRoute`, `buildPartnerSellRoute`, …), simulate, then let the
+  trader's wallet sign. A sell needs an approval of exactly `amountIn` to the forwarder.
+- Payments that fail are held as `claimable`; only the payout wallet can withdraw
+  (`buildPartnerWithdraw`). Say plainly that an unclaimed balance can be moved to the Peddles fee wallet
+  30 days after its last credit.
 
 ## Perps — launching a perp market
 

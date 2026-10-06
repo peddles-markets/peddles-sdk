@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.0 — Partner trades
+
+Added:
+
+- `PARTNER_FEE_FORWARDERS`, `partnerFeeForwarderFor(chainId)` — `PeddlesPartnerFeeForwarder` per chain
+  (null where not deployed). Live on Base, Robinhood Chain, BNB Smart Chain and Arc.
+- The voucher: `partnerVoucherTypedData(chainId, forwarder, partner, expiry)` (EIP-712 domain
+  `PeddlesPartnerFeeForwarder` / `1`, type `PartnerVoucher(address partner,uint256 expiry)`),
+  `partnerDomainSeparator`, `partnerVoucherDigest` (the contract's `voucherDigest`, computed the
+  contract's way and pinned against viem's `hashTypedData` and the live Base forwarder),
+  `parsePartnerVoucher` for the API's JSON, `isPartnerVoucherValid` (a `voucherValid` read).
+- Reads: `readPartnerTerms` (share, platform fee bounds, own-fee cap, signer, reclaim window),
+  `readPartnerClaimable`. Maths: `partnerFeeSplit`, the contract's rounding exactly.
+- Calldata builders for every entry point — `buildPartnerBuyV4` / `SellV4`, `BuyRoute` / `SellRoute`,
+  `BuyExternal` / `SellExternal`, `BuyRoutePancake` / `SellRoutePancake` — plus `buildPartnerWithdraw`,
+  `buildPartnerWithdrawTo` and `encodePartnerCall`. They fail closed (`PartnerUnavailableError`) on a
+  voucher for another chain or forwarder, and on rates outside the live terms when given.
+- Generated ABI `partnerFeeForwarderAbi` (also from `@peddles/sdk/abis`): trading entry points,
+  withdrawals, views, events and errors. Owner setters are absent.
+
 ## 0.5.0 — Snowball handle launches, perps on every mainnet
 
 Added:

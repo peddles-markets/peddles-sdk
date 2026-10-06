@@ -11,7 +11,7 @@ anti-sniper tax and holder rewards paid in the pool's own quote asset.
 Read launches from the chain, build launch transactions for your users to sign, and decode what
 went wrong when one reverts — with the same code the Peddles app runs.
 
-- 🌐 **Website:** [peddles.xyz](https://peddles.xyz) · **App:** [pro.peddles.xyz](https://pro.peddles.xyz) · **Swap:** [peddleswap.xyz](https://peddleswap.xyz) · **Terminal:** [terminal.peddles.xyz](https://terminal.peddles.xyz)
+- 🌐 **Website:** [peddles.xyz](https://peddles.xyz) · **App:** [pro.peddles.xyz](https://pro.peddles.xyz) · **Swap:** [peddleswap.xyz](https://peddleswap.xyz) · **Terminal:** [peddles.xyz/terminal](https://peddles.xyz/terminal)
 - 📚 **Docs:** [docs.peddles.xyz](https://docs.peddles.xyz) · **Developers:** [docs.peddles.xyz/docs/sdk](https://docs.peddles.xyz/docs/sdk)
 - 🤖 **Integrating with an AI coding agent?** Paste [`CLAUDE_PROMPT.md`](./CLAUDE_PROMPT.md) into Claude (or any agent).
 
@@ -171,6 +171,49 @@ Availability, per chain (`snowballFactoryFor(chainId)`; every Snowball builder t
 | Robinhood Chain 4663 | ✅ | ⏳ needs the creator-bound orchestrator; its Safe batch is not signed yet, so the builders refuse (`saltBinding: 'none'`) |
 
 Handle launches with Snowball are not deployed yet and are not in this SDK.
+
+## Partner trades — earn on the trades your app routes
+
+`PeddlesPartnerFeeForwarder` (live on Base, Robinhood Chain, BNB Smart Chain and Arc —
+`partnerFeeForwarderFor(chainId)`, `null` where absent) splits the platform fee of a trade your app
+routes: `partnerShareBps` of it to you (10% at deploy), plus your own fee on top (`partnerFeeBps`, up to
+`maxPartnerFeeBps`, 1%). The platform fee is between `minFeeBps` and `maxFeeBps` (0.5%..2%). Both are
+taken on the native leg, and the trader's wallet signs the calldata that carries both rates. Read the
+terms live with `readPartnerTerms`; never hardcode them.
+
+A trade names you with a **voucher**: Peddles' EIP-712 signature over `PartnerVoucher(partner, expiry)`
+for one chain and one forwarder. Prove a payout address on [dev.peddles.xyz/earnings](https://dev.peddles.xyz/earnings),
+then fetch vouchers from your server with an API key holding `partner:voucher` (valid up to 30 days;
+cache and renew). A voucher can only ever pay the address it names.
+
+```ts
+import { buildPartnerBuyRoute, parsePartnerVoucher, readPartnerTerms, partnerFeeSplit } from '@peddles/sdk';
+
+const res = await fetch('https://api.peddles.xyz/api/v1/launch-api/partner/voucher', {
+  method: 'POST',
+  headers: { 'X-API-Key': process.env.PEDDLES_API_KEY!, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ chainIds: [8453] }),
+});
+const voucher = parsePartnerVoucher((await res.json()).data.vouchers[0]);
+const terms = await readPartnerTerms(client, voucher.forwarder);
+const request = buildPartnerBuyRoute({
+  voucher, terms, chainId: 8453, token, hops: [], value, minOut,
+  feeBps: terms.minFeeBps, partnerFeeBps: 25, deadline,
+});
+await wallet.writeContract({ ...request, account: trader });
+partnerFeeSplit(value, terms.minFeeBps, 25, terms.partnerShareBps); // exactly what the contract books
+```
+
+Builders for every entry point: `buildPartnerBuyV4` / `buildPartnerSellV4` (ETH-paired launches),
+`buildPartnerBuyRoute` / `buildPartnerSellRoute` (every launch type), `buildPartnerBuyExternal` /
+`buildPartnerSellExternal` (other v4 tokens), `buildPartnerBuyRoutePancake` / `buildPartnerSellRoutePancake`
+(BSC stock legs on PancakeSwap); `encodePartnerCall` gives `{ to, data, value }`. They refuse a voucher
+for another chain or forwarder, and rates outside the live terms when you pass `terms`. Your money is
+paid to your address inside the trade; a payment that fails is held as `claimable` (`readPartnerClaimable`)
+and withdrawn with `buildPartnerWithdraw` by the payout wallet — **an unclaimed balance can be moved to
+the Peddles fee wallet 30 days after its last credit.** `partnerVoucherTypedData` /
+`partnerVoucherDigest` reproduce the contract's EIP-712 exactly (pinned against `voucherDigest` on the
+live Base forwarder).
 
 ## Perps
 

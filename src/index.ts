@@ -4,7 +4,7 @@ import type { ReadClient } from './client.js';
  *
  * ONE PACKAGE, SIX ENTRY POINTS. Take only what you import:
  *
- *   @peddles/sdk               this file — chain resolution, launch reads, pool terms
+ *   @peddles/sdk               this file — chain resolution, launch reads, pool terms, partner trades
  *   @peddles/sdk/abis          ABI fragments alone, no runtime
  *   @peddles/sdk/clog          the Clog launch type
  *   @peddles/sdk/deployments   the address book
@@ -79,6 +79,7 @@ export {
   nftBondingGraduationOrchestratorAbi,
   nftStockGraduationOrchestratorAbi,
   liquidityExecutorAbi,
+  partnerFeeForwarderAbi,
 } from './abis.js';
 
 export {
@@ -92,6 +93,47 @@ export {
   holderClaimable,
 } from './artDex.js';
 export type { RelayParams, StockTermsLaunch, HolderCommitment, DistributorState, HolderClaimable } from './artDex.js';
+
+export {
+  PARTNER_FEE_FORWARDERS,
+  PARTNER_VOUCHER_DOMAIN_NAME,
+  PARTNER_VOUCHER_DOMAIN_VERSION,
+  PARTNER_VOUCHER_TYPES,
+  PARTNER_VOUCHER_TYPEHASH,
+  PartnerUnavailableError,
+  partnerFeeForwarderFor,
+  partnerVoucherTypedData,
+  partnerDomainSeparator,
+  partnerVoucherDigest,
+  parsePartnerVoucher,
+  readPartnerTerms,
+  readPartnerClaimable,
+  isPartnerVoucherValid,
+  partnerFeeSplit,
+  buildPartnerBuyV4,
+  buildPartnerSellV4,
+  buildPartnerBuyRoute,
+  buildPartnerSellRoute,
+  buildPartnerBuyExternal,
+  buildPartnerSellExternal,
+  buildPartnerBuyRoutePancake,
+  buildPartnerSellRoutePancake,
+  buildPartnerWithdraw,
+  buildPartnerWithdrawTo,
+  encodePartnerCall,
+} from './partner.js';
+export type {
+  PartnerVoucher,
+  PartnerVoucherJson,
+  PartnerTerms,
+  PartnerFeeSplit,
+  PartnerPoolKey,
+  PartnerPathHop,
+  PartnerPancakeHop,
+  PartnerTradeTerms,
+  PartnerBuyArgs,
+  PartnerSellArgs,
+} from './partner.js';
 
 export { getPoolTerms, PoolTermsUnavailableError } from './feeTerms.js';
 export type { PoolTerms, PoolTermsFailure } from './feeTerms.js';
