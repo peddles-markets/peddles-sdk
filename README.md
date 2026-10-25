@@ -93,8 +93,8 @@ import {
 const addresses = launchAddressesFor(8453);
 const salt = randomSalt();   // or mineSalt({...}) for a vanity `…1978` token address, like the Peddles app
 // `creator` is the wallet that will SEND the launch: the token address is bound to it, so nobody who
-// copies the salt from a pending transaction can launch at that address. (Robinhood Chain moves to
-// the bound contracts later; `addresses.saltBinding` says which a chain uses and the plan follows it.)
+// copies the salt from a pending transaction can launch at that address. (`addresses.saltBinding` says
+// which binding a chain uses and the plan follows it; every shipped chain is creator-bound.)
 const plan = await buildWethLaunchPlan(client, addresses, { salt, creator: user, variant: 0 });   // 0 = plain launch
 const { launchFee: launchFeeWei } = await readOrchestratorLaunchFee(client, addresses.orchestrator); // read, never assumed
 
@@ -167,8 +167,7 @@ Availability, per chain (`snowballFactoryFor(chainId)`; every Snowball builder t
 
 | Chain | Stock-paired | WETH-type / Clog |
 | --- | --- | --- |
-| Base 8453, BNB Smart Chain 56, Arc 5042 | ✅ (Arc shows no stock pairs yet) | ✅ |
-| Robinhood Chain 4663 | ✅ | ⏳ needs the creator-bound orchestrator; its Safe batch is not signed yet, so the builders refuse (`saltBinding: 'none'`) |
+| Base 8453, BNB Smart Chain 56, Arc 5042, Robinhood Chain 4663 | ✅ (Arc shows no stock pairs yet) | ✅ |
 
 Handle launches with Snowball are not deployed yet and are not in this SDK.
 
