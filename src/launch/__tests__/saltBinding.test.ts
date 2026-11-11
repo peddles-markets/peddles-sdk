@@ -22,7 +22,8 @@ test('every chain in the address book says how its orchestrator derives a launch
     assert.equal(binding, LAUNCH_SALT_BINDINGS[id as keyof typeof LAUNCH_SALT_BINDINGS]);
     assert.equal(launchAddressesFor(id).saltBinding, binding, `chain ${id}`);
   }
-  assert.throws(() => launchSaltBindingFor(1), UnknownChainError);
+  assert.equal(launchSaltBindingFor(1), 'creator');
+  assert.throws(() => launchSaltBindingFor(10), UnknownChainError);
 });
 
 test('a record names the binding or has none; anything else is refused', () => {

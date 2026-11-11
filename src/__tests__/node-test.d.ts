@@ -29,3 +29,23 @@ declare module '*.sol' {
   const source: string;
   export default source;
 }
+
+/** The slice of Node's `Buffer` and `node:crypto` the Solana verify test uses to build account bytes. */
+interface NodeTestBuffer extends Uint8Array {
+  writeUInt32LE(value: number, offset?: number): number;
+  writeUInt16LE(value: number, offset?: number): number;
+  copy(target: Uint8Array, targetStart?: number): number;
+  subarray(start?: number, end?: number): NodeTestBuffer;
+}
+
+declare const Buffer: {
+  from(data: string | Uint8Array, encoding?: 'hex' | 'utf8'): NodeTestBuffer;
+  alloc(size: number): NodeTestBuffer;
+  concat(list: readonly Uint8Array[]): NodeTestBuffer;
+};
+
+declare module 'node:crypto' {
+  export function createHash(algorithm: 'sha256'): {
+    update(data: string | Uint8Array): { digest(): NodeTestBuffer };
+  };
+}

@@ -25,6 +25,14 @@ went wrong when one reverts — with the same code the Peddles app runs.
 | **Robinhood Chain** | 4663 | ✅ Live — mainnet | [robin.etherscan.io](https://robin.etherscan.io) |
 | **BNB Smart Chain** | 56 | ✅ Live — mainnet | [bscscan.com](https://bscscan.com) |
 | **Arc** | 5042 | ✅ Live — mainnet (no stock pairs yet; gas and the ETH-type quote are USDC) | [explorer.arc.io](https://explorer.arc.io) |
+| **Ethereum** | 1 | ✅ Live — mainnet (no stock pairs or perps yet) | [etherscan.io](https://etherscan.io) |
+| **Elysium** | 99901 | ✅ Live — mainnet (Kinetiq; gas HYPE, the ETH-type quote is WHYPE; no stock pairs or perps; Clog, handle and Snowball launches open once its Safe registers them) | [elysium.kinetiq.xyz/explorer](https://elysium.kinetiq.xyz/explorer) |
+
+Not in the SDK yet: **Anubis** (6714) launches on Gully Core rather than Uniswap v4; its core contracts
+are live, and it needs its own SDK support first.
+
+**Solana:** the SDK does not build Solana launches. `verifyPeddlesMint` checks whether a Solana mint is
+a genuine Peddles launch — see [Solana](#solana).
 
 The SDK ships an address book **only for chains with a live deployment**. `supportedChains()` is the
 source of truth; a chain that is not in it throws `UnknownChainError` rather than falling back to
@@ -69,7 +77,7 @@ import { supportedChains, addressOf, getTokenInfo, getPoolTerms, feeSplit } from
 
 const client = createPublicClient({ chain: base, transport: http() });
 
-supportedChains();                           // [56, 4663, 5042, 8453]
+supportedChains();                           // [1, 56, 4663, 5042, 8453, 99901]
 addressOf(8453, 'PeddlesFactoryV20');        // 0x90bD4d38F621529b4aD6480c221075B7317b1978
 
 // Identity and supply, read from the token itself — never assume 18 decimals.
@@ -167,14 +175,14 @@ Availability, per chain (`snowballFactoryFor(chainId)`; every Snowball builder t
 
 | Chain | Stock-paired | WETH-type / Clog |
 | --- | --- | --- |
-| Base 8453, BNB Smart Chain 56, Arc 5042 | ✅ (Arc shows no stock pairs yet) | ✅ |
-| Robinhood Chain 4663 | ✅ | ⏳ needs the creator-bound orchestrator; its Safe batch is not signed yet, so the builders refuse (`saltBinding: 'none'`) |
+| Base 8453, BNB Smart Chain 56, Arc 5042, Ethereum 1 | ✅ (Arc and Ethereum show no stock pairs yet) | ✅ |
+| Robinhood Chain 4663 | ✅ | ✅ (`saltBinding: 'creator'`) |
 
 Handle launches with Snowball are not deployed yet and are not in this SDK.
 
 ## Partner trades — earn on the trades your app routes
 
-`PeddlesPartnerFeeForwarder` (live on Base, Robinhood Chain, BNB Smart Chain and Arc —
+`PeddlesPartnerFeeForwarder` (live on Base, Robinhood Chain, BNB Smart Chain, Arc and Ethereum —
 `partnerFeeForwarderFor(chainId)`, `null` where absent) splits the platform fee of a trade your app
 routes: `partnerShareBps` of it to you (10% at deploy), plus your own fee on top (`partnerFeeBps`, up to
 `maxPartnerFeeBps`, 1%). The platform fee is between `minFeeBps` and `maxFeeBps` (0.5%..2%). Both are
@@ -262,8 +270,24 @@ takes the addresses, and the original reverts having paid only gas.
 | --- | --- |
 | Base 8453 | ✅ Live |
 | Robinhood Chain 4663 | ✅ Live |
+| BNB Smart Chain 56 | ✅ Live |
+| Arc 5042 | ✅ Live |
+| Ethereum 1 | — not deployed (`perpContracts(1)` throws) |
 
 The perp contracts have **no external audit**.
+
+## Solana
+
+`verifyPeddlesMint(mint, programId, getAccount)` answers one question from the chain: is this Solana
+mint a real Peddles launch? It is, only if the launch program's `LaunchRecord` exists for the mint and
+Metaplex shows the program's creator address as both the update authority and a verified creator. The
+`PEDL` ending of a mint address proves nothing (anyone can grind one) and is not read.
+`peddlesCreatorAddress(programId)` returns that creator address.
+
+No dependency and no network: you pass `getAccount(address)`, which returns `{ owner, data }`, `null`
+for a missing account, and **throws** when the read fails, so "could not check" never reads as "no".
+The mainnet launch program is `4jTFPcqrwzxP9Ve7xo6dUk4oYWbfbi78qm63tX1JC4tL`; take it from your config.
+Launching on Solana is not open yet.
 
 ## Rules the SDK follows — and your integration should too
 

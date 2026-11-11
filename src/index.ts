@@ -286,3 +286,6 @@ export function supportedChains(): number[] {
 // Imported lazily-shaped to keep the public surface honest: `supportedChains`
 // reads the same generated map every other entry point does.
 import { DEPLOYMENTS as DEPLOYMENTS_KEYS } from './deployments.generated.js';
+
+export { peddlesCreatorAddress, verifyPeddlesMint } from './solanaVerify.js';
+export type { GetSolanaAccount, PeddlesMintCheck, SolanaAccountRead } from './solanaVerify.js';

@@ -36,8 +36,9 @@ test('the forwarder per chain comes from the address book, null where absent', (
     const listed = (book as Record<string, string>)['PeddlesPartnerFeeForwarder'] ?? null;
     assert.equal(partnerFeeForwarderFor(Number(id)), listed, `chain ${id}`);
   }
-  for (const id of [8453, 4663, 56, 5042]) assert.match(String(PARTNER_FEE_FORWARDERS[id as keyof typeof PARTNER_FEE_FORWARDERS]), /^0x[0-9a-fA-F]{40}$/);
-  assert.throws(() => partnerFeeForwarderFor(1), /no deployment for chain 1/);
+  for (const id of [8453, 4663, 56, 5042, 1]) assert.match(String(PARTNER_FEE_FORWARDERS[id as keyof typeof PARTNER_FEE_FORWARDERS]), /^0x[0-9a-fA-F]{40}$/);
+  // Optimism (10): no Peddles deployment.
+  assert.throws(() => partnerFeeForwarderFor(10), /no deployment for chain 10/);
   // Sepolia is a testnet: the published address book does not carry it.
   assert.throws(() => partnerFeeForwarderFor(11155111), /no deployment for chain 11155111/);
 });

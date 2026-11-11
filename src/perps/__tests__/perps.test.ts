@@ -41,7 +41,9 @@ test('perps ship for Base and Robinhood Chain, and every address is well-formed 
 });
 
 test("perpContracts fails closed — never another chain's addresses", () => {
-  assert.throws(() => perpContracts(1), UnknownChainError);
+  assert.throws(() => perpContracts(10), UnknownChainError);
+  // Ethereum (1) is in the address book but has no perps: a different refusal, still no address.
+  assert.throws(() => perpContracts(1), PerpsUnavailableError);
   assert.throws(() => perpContracts(Number.NaN), UnknownChainError);
   // Every shipped mainnet carries perps since 2026-10-04 (BSC and Arc Safes bound their factories):
   // each resolves its OWN factory, never another chain's.
@@ -181,7 +183,7 @@ test('buildPerpCreate refuses what the factory would refuse', () => {
     hookSalt: HOOK_SALT,
     seedBuyBase: 0n,
   } as const;
-  assert.throws(() => buildPerpCreate({ ...ok, chainId: 1 }), UnknownChainError);
+  assert.throws(() => buildPerpCreate({ ...ok, chainId: 10 }), UnknownChainError);
   assert.throws(() => buildPerpCreate({ ...ok, name: '' }), /non-empty/);
   assert.throws(() => buildPerpCreate({ ...ok, symbol: '' }), /non-empty/);
   assert.throws(() => buildPerpCreate({ ...ok, base: '0x1234' as never }), /address/);
@@ -211,5 +213,5 @@ test("readPerpBase asks the chain's own factory and returns bigints", async () =
   });
   assert.equal(calls[0]?.address, PERP_DEPLOYMENTS[4663].PeddlesPerpFactory);
   assert.equal(calls[0]?.functionName, 'bases');
-  await assert.rejects(readPerpBase(client, 1, base.base), UnknownChainError);
+  await assert.rejects(readPerpBase(client, 10, base.base), UnknownChainError);
 });

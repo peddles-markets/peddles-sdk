@@ -5,6 +5,37 @@
 
 /** Every Peddles contract address the SDK knows, by chain id. */
 export const DEPLOYMENTS = {
+  1: {
+    PeddlesClogVaultFactory: '0x019d6A0e4c8a0E585946eF12dCFA1e8E2f0BCd0b',
+    PeddlesFactoryV20: '0xBE02501376831DD3DC6617BA0BBFb1C43F9D1978',
+    PeddlesFeeForwarder: '0xfe9563B7952fEB2091816133a22A4D62171fD77e',
+    PeddlesFeeHook: '0x2AC9dAc4eB0e43c0ba0da85551eE55e369b980cC',
+    PeddlesHandleLauncher: '0x506960Da716B5164dC3441CBCC3Fe0E2B9f11253',
+    PeddlesHandlePotFactory: '0xeb4151af845A51a8d14917fA9dC47cAd208bEf8D',
+    PeddlesHolderRewardsFactory: '0x2a9b23FB7DF059ad86Da68BeCF4756D170211978',
+    PeddlesLaunchOrchestratorV20: '0x07bAC67c56D81EaFB495c05ed43eb9ef48aa1978',
+    PeddlesLiquidityActivationManager: '0x33f18AC1d70d3abd6C2b1E0c46DF87E153841978',
+    PeddlesNFTBondingGraduationOrchestratorV20: '0x0A3ba61cCa458bb78e0c1A3Ca0c16CF805281978',
+    PeddlesNFTFactory: '0xd2482de6664C7d19622E328016f2acF354421978',
+    PeddlesNftFeeDistributorFactory: '0x1fD6668305BEE3F94614b3d88c4640f28C881978',
+    PeddlesNftLiquidityReserve: '0xD1e617C0d65CB67691B72EC954F1371fa10D1978',
+    PeddlesNFTMarketplace: '0x4B22A81722c26bC97C9DA3395642Ff6eF8D71978',
+    PeddlesNftStockGraduationOrchestrator: '0x61218D8BE813958713D8A31FDFeff8A408Aa1978',
+    PeddlesPartnerFeeForwarder: '0xfce6D13E525e1e6034d72967D1C3bfe934ce953f',
+    PeddlesRouteSwapRouter: '0x3a6a8e21Fc09d27fc3f9Ad57E012dA69032149D4',
+    PeddlesSnowballFactory: '0x336a9c801709400e2C0fDfc953f9B81B26070326',
+    PeddlesSnowballHandleFactory: '0xA317569C7156F25Dca3c704E38e0aA3249d2521F',
+    PeddlesSnowballHandleVaultDeployer: '0xB70dB70072d1197839dAe4aDCACB9e9b7d4541e8',
+    PeddlesSnowballVaultDeployer: '0x43f6480B9B458e1E5D6dc8944df37Da093B27383',
+    PeddlesStockLaunchpad: '0x1a924526BAa49108EF67Ecad3FC9022bf9d31978',
+    PeddlesStockSwapRouter: '0x515B57aCB914E298EA7bDc6AceBBF6Df4ae81978',
+    PeddlesStockVaultFactory: '0xa23DEF871720740f98f7c732f0Ce282232Bf1978',
+    PeddlesTransferValidator: '0x76406c514E5a4afc6Df479c04282e3Db671B1978',
+    PeddlesV4LiquidityExecutor: '0x84AC19F850B98a65383EeB2A04a7347C66E01978',
+    PeddlesV4SwapRouter: '0xDaa33F9591757734E5e676F41F3d292F1cdf1978',
+    PeddlesVaultFactoryV20: '0x8188B7816CC175e287A7229Ad0ccd24153501978',
+    PeddlesVaultRegistry: '0x54C7B09B976bE702eaD32A9cfAa11518289C1978',
+  },
   56: {
     PeddlesClogVaultFactory: '0x019d6A0e4c8a0E585946eF12dCFA1e8E2f0BCd0b',
     PeddlesFactoryV20: '0x220F5e98C3085E34EE68298847Fb63a3132D1978',
@@ -143,6 +174,37 @@ export const DEPLOYMENTS = {
     PeddlesVaultFactoryV20: '0x80d0B683B5e8D4B4e669d0367C62fC9893F11978',
     PeddlesVaultRegistry: '0xb390c4A83D8B308b378250a59F273A7c9aDF1978',
   },
+  99901: {
+    PeddlesClogVaultFactory: '0x8563Aeec8C63d53BC8dfbE56FF9134a7b1e80503',
+    PeddlesFactoryV20: '0xD83B21Ad87Bc0846C4E0fb29209086799A0c1978',
+    PeddlesFeeForwarder: '0xeb4151af845A51a8d14917fA9dC47cAd208bEf8D',
+    PeddlesFeeHook: '0x0B210fE5024D01f63f5C159B27A74196e66a40cc',
+    PeddlesHandleLauncher: '0x336a9c801709400e2C0fDfc953f9B81B26070326',
+    PeddlesHandlePotFactory: '0x506960Da716B5164dC3441CBCC3Fe0E2B9f11253',
+    PeddlesHolderRewardsFactory: '0x475370E75b597fB5F2F3c7901DCeF3B66a721978',
+    PeddlesLaunchOrchestratorV20: '0xa8748D6A08d5Ab4b72B017cEcdB39889B9f01978',
+    PeddlesLiquidityActivationManager: '0x039B368B8313f79ecDDAF50202C405A5575A1978',
+    PeddlesNFTBondingGraduationOrchestratorV20: '0xAD6830c323c860Ab050707C45aC51958146d1978',
+    PeddlesNFTFactory: '0x054632397BEF2F206bCD7F334B620F92D0AE1978',
+    PeddlesNftFeeDistributorFactory: '0x686c17a141DF7f34a488040b611798296d431978',
+    PeddlesNftLiquidityReserve: '0xF731f45A1C1A53E279731fcF5C5AD214d6821978',
+    PeddlesNFTMarketplace: '0x7100D2efc4aBc0d45ac809a505E60f6B22d41978',
+    PeddlesNftStockGraduationOrchestrator: '0x3494fC88c6703D450535E741Df3310fdD99A1978',
+    PeddlesPartnerFeeForwarder: '0xA4858047F9c7359CC0d9071598BFA74187739d8D',
+    PeddlesRouteSwapRouter: '0xfe9563B7952fEB2091816133a22A4D62171fD77e',
+    PeddlesSnowballFactory: '0xA317569C7156F25Dca3c704E38e0aA3249d2521F',
+    PeddlesSnowballHandleFactory: '0xfce6D13E525e1e6034d72967D1C3bfe934ce953f',
+    PeddlesSnowballHandleVaultDeployer: '0xa6b2b048B631F4FB1eb29684509fd360436aA575',
+    PeddlesSnowballVaultDeployer: '0xB70dB70072d1197839dAe4aDCACB9e9b7d4541e8',
+    PeddlesStockLaunchpad: '0x7A173460eCd36AaA3FFa68a7c9409b403Cdd1978',
+    PeddlesStockSwapRouter: '0xF0fc41eBCEf6192dAb9Aa1729c5Ea6fa75EB1978',
+    PeddlesStockVaultFactory: '0x5a71Ecb5c9D6D8c5bd4B69Aa2970bEb256391978',
+    PeddlesTransferValidator: '0x8b3A5f89EEDAB1a5129233a74AC0Bb6D52F21978',
+    PeddlesV4LiquidityExecutor: '0xB249745660488Cc05135486ED7dc1AAC3D431978',
+    PeddlesV4SwapRouter: '0xAE1D3d300441E64fd703d59278892dD661851978',
+    PeddlesVaultFactoryV20: '0x8beF5b524b4806801644E4cAc5BB058ad25e1978',
+    PeddlesVaultRegistry: '0xF25d1AD5C32dB2d3abF1C6115d31DB3a40CC1978',
+  },
 } as const;
 
 /**
@@ -151,10 +213,12 @@ export const DEPLOYMENTS = {
  * not yet on the creator-bound orchestrator.
  */
 export const LAUNCH_SALT_BINDINGS = {
+  1: 'creator',
   56: 'creator',
   4663: 'creator',
   5042: 'creator',
   8453: 'creator',
+  99901: 'creator',
 } as const;
 
 /**

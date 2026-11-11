@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.7.0 — Ethereum and Elysium mainnets, Solana mint verification
+
+Added:
+
+- **Elysium (chain 99901, Kinetiq)** in the address book: the full stack deployed 2026-11-09/10 (29
+  contracts, from `contracts/deployments/99901.json`, launch salt binding `creator`). `supportedChains()` is
+  now `[1, 56, 4663, 5042, 8453, 99901]`. Gas is HYPE and the ETH-type quote is WHYPE; no stock pairs and
+  no perps there (`hasPerps(99901)` is false). The Clog variant, NFT bonding, handle and Snowball launchers
+  are deployed but take launches only once the Elysium Safe registers them (its batch 1).
+- **Ethereum (chain 1)** in the address book: the full Peddles stack deployed 2026-11-09 (29 contracts,
+  from `contracts/deployments/1.json`, launch salt binding `creator`). `supportedChains()` is now
+  `[1, 56, 4663, 5042, 8453]`, and every per-chain helper resolves chain 1 from the book:
+  `launchAddressesFor`, `snowballFactoryFor` / `snowballHandleFactoryFor`, `partnerFeeForwarderFor`.
+  Ethereum has **no perps**: `hasPerps(1)` is false and `perpContracts(1)` throws `PerpsUnavailableError`.
+  No stock quote is whitelisted on chain 1 yet, so stock-paired builders have nothing to pair against there
+  until its quotes are set.
+- `verifyPeddlesMint(mint, programId, getAccount)` and `peddlesCreatorAddress(programId)`, with the
+  types `GetSolanaAccount`, `SolanaAccountRead` and `PeddlesMintCheck`: is a Solana mint a real Peddles
+  launch, answered from the chain (the launch program's `LaunchRecord`, and the program's creator address
+  as Metaplex update authority and verified creator). No dependency and no network; the `PEDL` address
+  ending is not read. Launching on Solana is not in the SDK.
+
+Changed:
+
+- `solanaVerify` encodes its ASCII seeds without `TextEncoder`, so the package builds against plain
+  ES2022 (since the Solana check landed, `pnpm build` failed on it).
+- README and `CLAUDE_PROMPT.md`: Ethereum in the chain tables, perps listed on Base, Robinhood Chain, BNB
+  Smart Chain and Arc, Robinhood Chain on the creator-bound orchestrator, a Solana section.
+
+Not included: Anubis (6714). Its venue is Gully Core, whose contracts the SDK's Uniswap v4 reads do not
+fit; it stays out of `supportedChains()` until it has its own support.
+
 ## 0.6.0 — Partner trades
 
 Added:

@@ -240,7 +240,8 @@ test('every shipped chain resolves its Snowball factory from the book, or null',
     assert.equal(launchAddressesFor(id).snowballFactory, expected);
     if (expected) assert.equal(requireSnowballFactory(id), expected);
   }
-  assert.throws(() => snowballFactoryFor(1));
+  assert.match(String(snowballFactoryFor(1)), /^0x[0-9a-fA-F]{40}$/); // Ethereum ships Snowball
+  assert.throws(() => snowballFactoryFor(10));
 });
 
 test('handle snowball: the oracle ticket goes first, the rest is the stock call; encodes against the handle factory ABI', () => {
