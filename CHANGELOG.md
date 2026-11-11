@@ -1,5 +1,78 @@
 # Changelog
 
+## 0.8.0 — Solana launch building, Anubis (Gully Core) launches
+
+Added:
+
+- **`@peddles/sdk/solana`: build a Peddles Solana launch, not only verify one.** This is a new entry
+  point with no dependencies (no `@solana/web3.js`, no `viem`). It is ported from the Peddles web
+  form's own launch code, and a parity test checks that its output is byte-identical to the web's:
+  instruction data, the 28 account metas, compiled v0 transactions, fee maths, mint decoding and the
+  `PEDL` grind. New exports include:
+  - `prepareSolanaLaunch(input)`, which reads `Config`, the quote's `QuoteConfig`, mint and Meteora
+    badge, and the lookup table. It validates the terms, sizes the first buy and returns the unsigned
+    v0 transaction, together with the live `launchFeeLamports`, an estimate of the deposits, and what
+    the creator must hold. A refusal comes back as `{ ok: false, reason }`; a failed read throws.
+  - `expectedFeeLamports` on `prepareSolanaLaunch`: the program charges `Config.launch_fee_lamports` at
+    execution with no maximum in the launch, so pass the fee the creator was shown and the build is
+    refused if `Config` now differs. `Config`, the quote's `QuoteConfig`, mint and badge are re-read on
+    every call even with a cached `chainState` (only its lookup table is reused). The result reports
+    `priorityFeeSource` (`given`, `read`, or `unavailable` when the fee read failed and the bid is 0),
+    and `lamportsNeeded` includes the creator's wSOL account rent on a SOL pair when that account does
+    not exist yet.
+  - `readLaunchChainState` and `meteoraBadgeAddress`.
+  - `checkSolanaQuote`, which passes a quote only if it is enabled, matches the program's record, is
+    not paused, frozen or hooked, and has a Meteora badge that matches.
+  - `solanaLaunchTerms`, the rules for the rate (1.25% to 5%), the split (required above the floor),
+    the ticker and the name.
+  - The builders: `deriveLaunchAddresses`, `encodeLaunchData`, `launchAccounts`, `launchInstruction`,
+    `buildLaunchTransaction`, `compileV0Transaction`, `computeBudgetInstructions`,
+    `wrapSolInstructions` and `launchMetadataDocument`.
+  - `grindPedlSalt({ programId, maxTries, signal?, creator?, onProgress? })`, a plain async search
+    with a try budget and an abort signal.
+  - `takePooledSalt` and `readPooledSalt`, for the API's salt pool. A pooled salt is accepted only
+    when its mint recomputes from the salt.
+  - The exact `bigint` maths: `volumeSplit`, `feeSchedule`, `firstBuyOpening`, `firstBuyQuoteNeeded`,
+    `firstBuyMaxQuote`, `liquidityForExactSupply`, `launchDepositsLamports` and `priorityBid`.
+  - Pricing at displayed price × live multiplier: `quoteUsdPerWholeRawE18` and
+    `openingMarketCapUsdE18`.
+  - Decoders for `Config`, `QuoteConfig`, mints (Token-2022 transfer fee, scaled-UI multiplier,
+    pause, default account state, transfer hook), `LaunchRecord`, Meteora pools and positions, and
+    Metaplex metadata.
+  - RPC helpers: `solanaRpc` (takes a URL, a `Connection`'s `rpcEndpoint`, or your own request
+    function), `getAccounts` and `simulateTransaction`.
+  - Constants: `SOLANA_LAUNCH_QUOTES` (the 123 listed quotes) and the program addresses.
+
+  Checked live on Solana mainnet on 2026-11-11 at 22:55Z, by simulation only; nothing was signed. A
+  SOL-paired launch built by the SDK simulated with no error at slot 468,298,307. The launch program
+  used 243,496 compute units, created the Meteora pool and locked the position permanently. The launch
+  fee read was still the $0.10 testing fee (1,146,526 lamports).
+- **Anubis (chain 6714): Gully Core launch building** (`src/gully/`, exported from the root). This is a
+  separate address book, `GULLY_DEPLOYMENTS`, generated from `contracts/deployments/6714.json` by
+  `script/generate-gully-deployments.mjs`. It ships the 7 live core contracts and the quote token, and
+  leaves out role wallets and the predicted add-ons, which are not deployed. New exports:
+  - `readGullyLaunchTerms`, which reads the fee live (2 DAI when this was written) and refuses a quote
+    or fee token that disagrees with the book;
+  - `readGullyWallet` and `planGullyLaunch`;
+  - `buildGullyApproveTx`, an approval for EXACTLY fee + first buy;
+  - `buildGullyLaunchTx`, `gullyLaunchRequest` and `encodeGullyLaunchCall`, for the coin and Drip types
+    (`launch` and `launchAndBuy`);
+  - salt and address helpers: `gullyLaunchSalt`, `randomGullySalt`, `computeGullyLaunchToken` and
+    `predictGullyLaunchToken`;
+  - `readGullyLaunchRecord`, plus the pending-launch settle helpers;
+  - revert decoding.
+
+  Gas on Anubis is DAI, pulled as an ERC-20, and every Anubis transaction has `value: 0n`. Gully's own
+  protocol fee (0.30%) applies to trades on top of the launch's terms. Holder rewards stream over one
+  hour. Calldata is held byte-identical to the web launch form by test, and an `eth_call` against Anubis
+  mainnet was checked live (block 18,902,325, 2026-11-11 22:49Z). `supportedChains()` is unchanged, so it
+  still lists only the Uniswap v4 chains.
+
+Changed:
+
+- The README, `CLAUDE_PROMPT.md` and this file now cover Solana launching and Anubis.
+- `npm run deployments` also regenerates the Gully address book (`src/gully/deployments.generated.ts`).
+
 ## 0.7.0 — Ethereum and Elysium mainnets, Solana mint verification
 
 Added:

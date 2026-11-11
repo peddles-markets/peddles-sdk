@@ -2,7 +2,7 @@ import type { ReadClient } from './client.js';
 /**
  * @peddles/sdk — read and build against Peddles launches.
  *
- * ONE PACKAGE, SIX ENTRY POINTS. Take only what you import:
+ * ONE PACKAGE, EIGHT ENTRY POINTS. Take only what you import:
  *
  *   @peddles/sdk               this file — chain resolution, launch reads, pool terms, partner trades
  *   @peddles/sdk/abis          ABI fragments alone, no runtime
@@ -10,6 +10,8 @@ import type { ReadClient } from './client.js';
  *   @peddles/sdk/deployments   the address book
  *   @peddles/sdk/launch        launch calldata builders, salts, revert decoding
  *   @peddles/sdk/perps         the perp launchpad (PeddlesPerpFactory)
+ *   @peddles/sdk/solana        Solana launches: build, check, verify (no dependency at all)
+ *   @peddles/sdk/gully         Anubis (6714) launches on Gully Core (also re-exported here)
  *
  * `viem` is a PEER dependency, not a bundled one: an integrator already has a
  * client, and two copies of viem in a bundle is both bloat and a source of
@@ -289,3 +291,7 @@ import { DEPLOYMENTS as DEPLOYMENTS_KEYS } from './deployments.generated.js';
 
 export { peddlesCreatorAddress, verifyPeddlesMint } from './solanaVerify.js';
 export type { GetSolanaAccount, PeddlesMintCheck, SolanaAccountRead } from './solanaVerify.js';
+
+// Anubis (6714): launches on Gully Core through PeddlesGullyLaunchpad. EVM only; gas is DAI and no
+// transaction carries native value. See src/gully/index.ts.
+export * from './gully/index.js';

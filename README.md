@@ -28,11 +28,11 @@ went wrong when one reverts — with the same code the Peddles app runs.
 | **Ethereum** | 1 | ✅ Live — mainnet (no stock pairs or perps yet) | [etherscan.io](https://etherscan.io) |
 | **Elysium** | 99901 | ✅ Live — mainnet (Kinetiq; gas HYPE, the ETH-type quote is WHYPE; no stock pairs or perps; Clog, handle and Snowball launches open once its Safe registers them) | [elysium.kinetiq.xyz/explorer](https://elysium.kinetiq.xyz/explorer) |
 
-Not in the SDK yet: **Anubis** (6714) launches on Gully Core rather than Uniswap v4; its core contracts
-are live, and it needs its own SDK support first.
+**Anubis** (6714): Peddles launches there run on Gully Core, not Uniswap v4, so Anubis has its own
+address book and builders and stays out of `supportedChains()`. See [Anubis](#anubis-6714-launches-on-gully-core).
 
-**Solana:** the SDK does not build Solana launches. `verifyPeddlesMint` checks whether a Solana mint is
-a genuine Peddles launch — see [Solana](#solana).
+**Solana:** `@peddles/sdk/solana` builds, checks and verifies Peddles Solana launches (program
+`4jTFPcqrwzxP9Ve7xo6dUk4oYWbfbi78qm63tX1JC4tL`). See [Solana](#solana).
 
 The SDK ships an address book **only for chains with a live deployment**. `supportedChains()` is the
 source of truth; a chain that is not in it throws `UnknownChainError` rather than falling back to
@@ -66,7 +66,8 @@ creator's chosen ratio. `feeSplit()` computes it exactly.
 npm i @peddles/sdk viem
 ```
 
-`viem` (v2) is a peer dependency. The package is ESM and ships its TypeScript types.
+`viem` (v2) is a peer dependency of the EVM entry points. `@peddles/sdk/solana` needs nothing (no
+`viem`, no `@solana/web3.js`). The package is ESM and ships its TypeScript types.
 
 ## Quick start
 
@@ -278,16 +279,133 @@ The perp contracts have **no external audit**.
 
 ## Solana
 
-`verifyPeddlesMint(mint, programId, getAccount)` answers one question from the chain: is this Solana
-mint a real Peddles launch? It is, only if the launch program's `LaunchRecord` exists for the mint and
-Metaplex shows the program's creator address as both the update authority and a verified creator. The
-`PEDL` ending of a mint address proves nothing (anyone can grind one) and is not read.
-`peddlesCreatorAddress(programId)` returns that creator address.
+Everything for Solana is in its own entry point, `@peddles/sdk/solana`, so an EVM-only app never loads
+it. It has **no dependencies**: no `@solana/web3.js`, no `viem`, no SPL or Metaplex packages. It runs
+the same code as the Peddles launch form (a parity test checks that the instruction bytes, the account
+metas and the compiled transactions are identical). It never holds a key and never signs.
 
-No dependency and no network: you pass `getAccount(address)`, which returns `{ owner, data }`, `null`
-for a missing account, and **throws** when the read fails, so "could not check" never reads as "no".
-The mainnet launch program is `4jTFPcqrwzxP9Ve7xo6dUk4oYWbfbi78qm63tX1JC4tL`; take it from your config.
-Launching on Solana is not open yet.
+```ts
+import {
+  prepareSolanaLaunch, simulateTransaction, takePooledSalt, grindPedlSalt,
+  PEDDLES_SOLANA_LAUNCH_PROGRAM_ID, WSOL_MINT,
+} from '@peddles/sdk/solana';
+import { Connection, VersionedTransaction } from '@solana/web3.js'; // optional: any wallet stack works
+
+const rpc = new Connection('https://your-node'); // or a URL, or your own request function
+// 1. An 8-byte salt that makes the coin address end in PEDL. Ask the API's pool first; if it has
+//    none, grind one (about 22.6M tries on average).
+const salt =
+  (await takePooledSalt())?.hit.salt ??
+  (await grindPedlSalt({ programId: PEDDLES_SOLANA_LAUNCH_PROGRAM_ID, maxTries: 300_000_000, signal }))?.salt;
+// 2. Read the chain, check the terms and the quote, then build the transaction.
+const launch = await prepareSolanaLaunch({
+  rpc, creator: wallet.publicKey.toBase58(), quoteMint: WSOL_MINT,
+  name: 'My Coin', symbol: 'MYC', uri: pinnedMetadataUrl, // launchMetadataDocument() builds the JSON to pin
+  ratePercent: '2', excessToCreatorBps: 5000,             // 1.25% to 5%; above 1.25% the split is required
+  firstBuy: { display: '0.1' },                            // optional, in the units the wallet shows
+  salt: salt!,
+  expectedFeeLamports: feeShownToCreator,                  // refused if Config's fee has moved since
+});
+if (!launch.ok) throw new Error(launch.reason);           // the SDK refuses; it never fills in a default
+// 3. Dry-run it, then the creator signs. The fee is launch.launchFeeLamports, read live from Config.
+const sim = await simulateTransaction(rpc, launch.transaction);
+if (sim.err === null) await wallet.signAndSendTransaction(VersionedTransaction.deserialize(launch.transaction));
+```
+
+What `prepareSolanaLaunch` checks, and what your integration must keep:
+
+- **The launch fee is read from the program's `Config`** (`launchFeeLamports`). It is never shipped in
+  the package. Right now it is the $0.10 testing fee (1,146,526 lamports, read 2026-11-11), until the
+  owner puts it back to $2. Show the creator the value you read.
+- **The program takes the fee from `Config` when the transaction executes**, not when you build it, and
+  the launch carries no maximum. So prepare, show, simulate and sign promptly, and pass the fee you
+  showed as `expectedFeeLamports`: if `Config` holds a different fee, `prepareSolanaLaunch` refuses.
+  `Config`, the quote's `QuoteConfig`, mint and badge are re-read on every call, even when you pass a
+  cached `chainState` (only its lookup table is reused).
+- **A stock quote needs a Meteora token badge** (`[b"token_badge", mint]` on DAMM v2), and it must match
+  the program's `QuoteConfig`. `checkSolanaQuote` refuses a stock that has no badge. It also refuses a
+  quote the program has not enabled, a mint that disagrees with the program's record, and a token its
+  issuer has paused, frozen or given a transfer hook.
+- **A stock is priced by its live multiplier.** The pool counts raw units, so a stock's dollar value is
+  the displayed price × the scaled-UI multiplier read from the mint (`quoteUsdPerWholeRawE18`,
+  `openingMarketCapUsdE18`). PreStocks ANTHROPIC is ×10. A first buy given as `display` is scaled the
+  same way (`displayToRaw`).
+- **PreStocks carry a 1% issuer transfer fee** on every transfer, on top of the launch's terms
+  (`quoteRawNeeded` includes it). **Every issuer can pause, seize or hook its token.** Tell the creator
+  both.
+- Two terms are fixed at launch. The first is the rate traders pay: 1.25% to 5%, in whole basis points,
+  never rounded. The second is the creator's share of everything above the two fixed 0.50% legs; holders
+  get the rest. Meteora keeps 20% of the pool fee. For the first 3 minutes, buys and sells pay an
+  anti-sniper fee that starts at 20% and falls to the rate; the creator's first buy pays only the rate.
+  The program's multisig can still upgrade it, so say "Peddles won't change it", never "nobody can".
+  Meteora's operator can change a pool's fee after the opening schedule ends (up to 10%); Peddles won't.
+
+The lower-level pieces are exported too:
+
+- **Instruction and transaction:** `deriveLaunchAddresses`, `encodeLaunchData`, `launchAccounts`,
+  `buildLaunchTransaction`, `compileV0Transaction` and `readLaunchChainState`.
+- **Decoders:** `decodeConfig`, `decodeQuoteConfig`, `decodeMint`, `decodeLaunchRecord`,
+  `decodeMeteoraPool` and `decodeMetadata`, among others.
+- **Exact fee maths:** `volumeSplit`, `feeSchedule`, `firstBuyOpening`, `firstBuyMaxQuote` and
+  `launchDepositsLamports`.
+
+Every amount is a `bigint` in base units.
+
+**Is a mint a real Peddles launch?** `verifyPeddlesMint(mint, programId, getAccount)` (also on the root
+export) answers from the chain. A mint is genuine only if the launch program's `LaunchRecord` exists
+for it, and Metaplex shows the program's creator address as both the update authority and a verified
+creator. The `PEDL` ending proves nothing, because anyone can grind one, so it is not read.
+`getAccount` returns `{ owner, data }`, returns `null` for a missing account, and **throws** when the
+read fails.
+
+**Which node to use:** the Peddles API's public proxy, `POST https://api.peddles.xyz/api/v1/rpc/solana`,
+answers the read methods a launch needs. It does not forward `simulateTransaction` or
+`sendTransaction`, so use your own node for those.
+
+## Anubis (6714): launches on Gully Core
+
+Anubis has no Uniswap v4. Peddles launches there go through `PeddlesGullyLaunchpad` on Gully Core, so
+it has its own address book and builders: `isGullyChain(6714)` is true and `gullyDeploymentFor(6714)`
+returns the core. `supportedChains()` stays the Uniswap v4 list, and every v4 builder still refuses 6714.
+
+- **Gas is DAI, and native value cannot move.** The launch fee and any first buy are paid in the DAI
+  ERC-20 (`0x83fd06F0846d9D90B3016bF670Efe2E0B11cDe14`), which the launchpad pulls with `transferFrom`.
+  Every transaction the SDK builds for Anubis has `value: 0n`.
+- **Approve exactly the fee plus the first buy, then launch.** `buildGullyApproveTx(6714, { launchFee, firstBuy })`
+  computes the amount from those two parts, so it is never an unlimited allowance. `planGullyLaunch`
+  reads the fee, balance and allowance fresh and returns the approval only when the allowance is short.
+- **The fee is read from the chain** (`readGullyLaunchTerms`), never shipped in the package. It is 2 DAI
+  today, and the owner can retune it at once, up to a 10 DAI cap. Pass the fee the creator was shown as
+  `expectedFee`: if the fee has moved, the plan is refused.
+- **Gully adds its own protocol fee to every trade**, on top of the launch's terms: 0.30% each way when
+  last read, and Gully can raise it to 0.40%.
+- **Holder rewards stream over one hour.** A holder who sells before the stream ends leaves the unpaid
+  part to the holders who stay.
+
+```ts
+import {
+  planGullyLaunch, buildGullyLaunchTx, gullyLaunchRequest, encodeGullyLaunchCall,
+  gullyFirstBuyFloorFor, randomGullySalt, predictGullyLaunchToken, GULLY_VARIANT,
+} from '@peddles/sdk';
+
+const variant = GULLY_VARIANT.plain; // or GULLY_VARIANT.drip
+const salt = randomGullySalt();      // keep it: a retry with the same salt can only make the same coin
+const plan = await planGullyLaunch(client, 6714, { creator, variant, firstBuy: 0n, expectedFee: shownFee });
+if (plan.approve) await wallet.sendTransaction(plan.approve); // wait for the receipt
+const tx = buildGullyLaunchTx(6714, {
+  variant, salt, name, symbol,
+  metadata: { image, website, x, telegram },
+  creatorTaxBps: 300n, excessToCreatorBps: 5000n,
+  firstBuy: 0n, minTokensOut: 0n,
+});
+const coin = await predictGullyLaunchToken(client, 6714, creator, variant, salt);
+```
+
+If you include a first buy, simulate the launch first and set the floor from that simulation:
+`gullyLaunchRequest({ ...args, minTokensOut: 0n })`, then `eth_call` it, then
+`gullyFirstBuyFloorFor(firstBuy, tokensOut)`. `buildGullyLaunchTx` refuses a first buy that has no floor.
+`settleGullyLaunch` and the `*GullyPendingLaunch` helpers settle a launch the wallet has already sent,
+from the chain, so it is never sent twice.
 
 ## Rules the SDK follows — and your integration should too
 

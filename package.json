@@ -1,6 +1,6 @@
 {
   "name": "@peddles/sdk",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Read and build against Peddles launches — memecoins paired to tokenised stocks.",
   "license": "MIT",
   "type": "module",
@@ -54,6 +54,16 @@
       "types": "./dist/launch/index.d.ts",
       "import": "./dist/launch/index.js",
       "default": "./dist/launch/index.js"
+    },
+    "./solana": {
+      "types": "./dist/solana/index.d.ts",
+      "import": "./dist/solana/index.js",
+      "default": "./dist/solana/index.js"
+    },
+    "./gully": {
+      "types": "./dist/gully/index.d.ts",
+      "import": "./dist/gully/index.js",
+      "default": "./dist/gully/index.js"
     },
     "./perps": {
       "types": "./dist/perps/index.d.ts",

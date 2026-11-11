@@ -66,6 +66,13 @@ import {
   isValidPerpHookAddress, predictPerpHook, predictPerpToken, buildPerpCreate,
   perpFactoryAbi, perpErrorsAbi, PERP_HOOK_FLAGS,
 } from '@peddles/sdk/perps';
+
+// Solana: build and verify Peddles Solana launches. No dependency; bring any wallet stack.
+import {
+  prepareSolanaLaunch, readLaunchChainState, checkSolanaQuote, solanaLaunchTerms,
+  takePooledSalt, grindPedlSalt, launchMetadataDocument, simulateTransaction, solanaRpc,
+  verifyPeddlesMint, SOLANA_LAUNCH_QUOTES, PEDDLES_SOLANA_LAUNCH_PROGRAM_ID,
+} from '@peddles/sdk/solana';
 ```
 
 Read the package's `README.md` and the `.d.ts` files in `node_modules/@peddles/sdk/dist` for exact
@@ -184,6 +191,65 @@ signatures before calling anything; do not invent parameters.
   with `perpErrorsAbi`.
 - Name, symbol and token URI are permanent. Perp contracts have no external audit — say so where a user
   commits money.
+
+## Solana launches — `@peddles/sdk/solana`
+
+- Build every launch with `prepareSolanaLaunch`, never by hand. It reads the program's `Config`, plus
+  the quote's `QuoteConfig`, mint and Meteora badge. It checks the terms and returns an UNSIGNED
+  version-0 transaction (`Uint8Array`) for the creator's wallet.
+- A `{ ok: false, reason }` result is a refusal. Show the reason and disable the button. Never retry
+  with a substituted value.
+- A thrown error is a failed read. Say that the chain could not be read.
+- **The launch fee is `launchFeeLamports` from the result, read live from `Config`. Never hardcode
+  it.** Right now it is the $0.10 testing fee, until the Peddles owner puts it back to $2, and the
+  admin retunes it as SOL moves. Show the creator the number you read, in SOL.
+- **The fee is taken from `Config` when the transaction executes**, and the launch carries no maximum.
+  Prepare, show, simulate and sign promptly, and always pass the fee you showed as
+  `expectedFeeLamports`; a `{ ok: false }` saying the fee moved means show the new fee and ask again.
+- **A pool can open only against a quote that has a Meteora token badge.** `checkSolanaQuote` refuses
+  a stock with no badge, a stock the program has not enabled, and a stock its issuer has paused,
+  frozen or hooked. A quote's identity is its mint address, never its ticker.
+- **A stock's price is the displayed price × the live multiplier** read from the mint
+  (`quoteUsdPerWholeRawE18`). Never price it one-to-one with the share. Pass a first buy typed in
+  wallet units as `firstBuy: { display }`; the SDK scales it by the multiplier.
+- Tell the creator three things before they sign:
+  - **PreStocks carry a 1% issuer transfer fee** on every transfer.
+  - **Every issuer can pause or seize its token.**
+  - The rate (1.25% to 5%) and the split are fixed at launch. Peddles won't change them, but the
+    program's multisig can still upgrade the program, so never say "nobody can". Meteora's operator
+    can change a pool's fee after the opening schedule ends (up to 10%); Peddles won't.
+- To get a salt, call `takePooledSalt()` first. If it returns nothing, call
+  `grindPedlSalt({ programId, maxTries, signal })` off the UI thread. A salt becomes public once a
+  transaction carries it, so if the coin address already exists, get a new salt.
+- Always run `simulateTransaction` before asking for a signature. The Peddles API's read proxy does not
+  forward that method, so use your own node. Never let the page claim success on its own: read the
+  signature status from the chain.
+- Amounts are `bigint` base units, each with its own decimals: xStocks 8, Sunrise 6, PreStocks 9, SOL 9.
+
+## Anubis (6714) — Gully Core, not Uniswap v4
+
+- Check `isGullyChain(chainId)` before choosing a builder. On 6714, use only the `Gully*` functions.
+  Never call a v4 builder there, and never call a Gully builder anywhere else: both throw rather than
+  fall back.
+- **No native value moves on Anubis.** Gas is DAI. The launch fee and the first buy are the DAI ERC-20,
+  pulled with `transferFrom`. Every transaction must have `value: 0n`.
+- Approve **exactly** `launchFee + firstBuy` to the launchpad, using `buildGullyApproveTx` or
+  `planGullyLaunch().approve`. Never approve `maxUint256`. Wait for the approval receipt before you
+  simulate or send the launch.
+- Read the launch fee live with `readGullyLaunchTerms`. It was 2 DAI when this was written. Never
+  hardcode it. Show it to the creator, then pass that same value as `expectedFee`; if the fee has
+  changed, the plan refuses.
+- Pick the launch type with `GULLY_VARIANT.plain` (100% liquidity) or `GULLY_VARIANT.drip` (5% held back
+  and sold in slices). The variant is part of the coin's address. If `variantRefusal` is not null, do not
+  offer that type.
+- First buy: simulate the launch with `minTokensOut: 0n`, then set the floor with
+  `gullyFirstBuyFloorFor`, then build. The builder refuses a first buy that has no floor.
+- Persist `{ salt, hash, variant, creator }` before you send, and settle it with `settleGullyLaunch`. A
+  launch that has a hash but no receipt has an unknown outcome. Never resend it with a new salt.
+- Tell users two things before they commit. Gully adds its own protocol fee (0.30%) to every trade, on
+  top of the creator's fee. Holder rewards are paid out over one hour, and a holder who sells earlier
+  leaves the unpaid part behind.
+- Amounts are `bigint` in base units. DAI has 18 decimals, and so does the coin.
 
 ## UI rules
 
